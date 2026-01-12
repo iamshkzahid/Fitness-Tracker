@@ -84,7 +84,10 @@ All data is stored locally in the browser and no backend is used.
 ### 👨‍💻 Author
 
 **Zahid Shaikh**
+---
 **Dayanand Jat**
-**Utharsh**
+---
+**Utharsh Jaiswal**
+---
 **Ashwin Lal**
-
+ 
