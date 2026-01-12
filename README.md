@@ -62,11 +62,11 @@ The project demonstrates dynamic UI updates, client-side authentication, and per
 
 ```
 ├── index.html
+├── Dashboard.html
 ├── Workout_Planner.html
 ├── BMI.html
 ├── Progress.html
 ├── Profile.html
-├── Login.html
 ├── styles.css
 ├── app.js
 └── screenshots/
