@@ -61,7 +61,7 @@ The project demonstrates dynamic UI updates, client-side authentication, and per
 ## 📁 Project Structure
 
 ```
-├── Dashboard.html
+├── index.html
 ├── Workout_Planner.html
 ├── BMI.html
 ├── Progress.html
