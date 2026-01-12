@@ -1,0 +1,40 @@
+
+
+
+/* ================================
+   DARK MODE SUPPORT
+   ================================ */
+
+body.dark-mode {
+  background-color: #0f172a;
+  color: #e5e7eb;
+}
+
+body.dark-mode .content,
+body.dark-mode .card,
+body.dark-mode .profile-card,
+body.dark-mode .settings-card,
+body.dark-mode .activity-table,
+body.dark-mode .workout-card {
+  background-color: #020617;
+  border-color: #1e293b;
+}
+
+body.dark-mode .nav-menu {
+  background-color: #020617;
+}
+
+body.dark-mode .nav-item {
+  color: #cbd5f5;
+}
+
+body.dark-mode .nav-item.active {
+  background-color: #1e293b;
+}
+
+body.dark-mode input,
+body.dark-mode select {
+  background-color: #020617;
+  color: #e5e7eb;
+  border-color: #334155;
+}

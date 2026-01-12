@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+     <meta charset="utf-8" />
+     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+     <title>Fitness Tracker - Login &amp; Sign Up</title>
+     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+          rel="stylesheet" />
+     <link href="https://fonts.googleapis.com" rel="preconnect" />
+     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap"
+          rel="stylesheet" />
+        <link rel="stylesheet" href="styles.css" >
+      <style>
+          :root {
+               --primary-color: #00e676;
+               --primary-hover: #00c853;
+               --bg-page: #050a06;
+               --bg-panel-left: #0f2319;
+               --bg-panel-right: #0a120b;
+               --input-bg: #121d14;
+               --border-color: #1f3127;
+               --text-white: #ffffff;
+               --text-gray: #9ca3af;
+               --text-dark: #0c1d15;
+               --error-color: #ef4444;
+               --radius-md: 8px;
+               --radius-lg: 12px;
+               --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+          }
+
+          * {
+               box-sizing: border-box;
+               margin: 0;
+               padding: 0;
+          }
+
+          body {
+               font-family: 'Inter', sans-serif;
+               background-color: var(--bg-page);
+               color: var(--text-white);
+               min-height: 100vh;
+               display: flex;
+               align-items: center;
+               justify-content: center;
+               padding: 1rem;
+          }
+
+          .container {
+               width: 100%;
+               max-width: 1200px;
+               min-height: 700px;
+               background-color: var(--bg-panel-right);
+               border-radius: var(--radius-lg);
+               box-shadow: var(--shadow);
+               overflow: hidden;
+               display: grid;
+               grid-template-columns: 1fr;
+          }
+
+          @media (min-width: 768px) {
+               .container {
+                    grid-template-columns: 1fr 1fr;
+               }
+          }
+
+          .brand-section {
+               background-color: var(--bg-panel-left);
+               position: relative;
+               padding: 3rem;
+               display: flex;
+               flex-direction: column;
+               justify-content: space-between;
+               overflow: hidden;
+          }
+
+          .bg-image {
+               position: absolute;
+               top: 0;
+               left: 0;
+               width: 100%;
+               height: 100%;
+               object-fit: cover;
+               opacity: 0.4;
+               mix-blend-mode: overlay;
+               z-index: 0;
+          }
+
+          .bg-gradient {
+               position: absolute;
+               top: 0;
+               left: 0;
+               width: 100%;
+               height: 100%;
+               background: linear-gradient(to top, var(--bg-panel-left), rgba(15, 35, 25, 0.8), transparent);
+               z-index: 1;
+          }
+
+          .brand-content {
+               position: relative;
+               z-index: 10;
+          }
+
+          .logo-wrapper {
+               display: flex;
+               align-items: center;
+               gap: 0.75rem;
+          }
+
+          .logo-icon {
+               width: 40px;
+               height: 40px;
+               background-color: rgba(0, 230, 118, 0.2);
+               backdrop-filter: blur(4px);
+               border-radius: var(--radius-md);
+               display: flex;
+               align-items: center;
+               justify-content: center;
+          }
+
+          .logo-text {
+               font-size: 1.25rem;
+               font-weight: 700;
+               letter-spacing: -0.025em;
+          }
+
+          .hero-text h1 {
+               font-size: 2.5rem;
+               font-weight: 900;
+               line-height: 1.1;
+               margin-bottom: 1rem;
+               letter-spacing: -0.03em;
+          }
+
+          @media (min-width: 1024px) {
+               .hero-text h1 {
+                    font-size: 3rem;
+               }
+          }
+
+          .text-gradient {
+               background: linear-gradient(to right, var(--primary-color), #34d399);
+               -webkit-background-clip: text;
+               background-clip: text;
+               color: transparent;
+          }
+
+          .hero-desc {
+               color: #d1d5db;
+               font-size: 1.125rem;
+               line-height: 1.6;
+               max-width: 28rem;
+          }
+
+          .testimonials {
+               margin-top: 2rem;
+               padding-top: 2rem;
+               border-top: 1px solid rgba(255, 255, 255, 0.1);
+               display: flex;
+               align-items: center;
+               gap: 1rem;
+          }
+
+          .avatar-group {
+               display: flex;
+          }
+
+          .avatar {
+               width: 40px;
+               height: 40px;
+               border-radius: 50%;
+               border: 2px solid var(--bg-panel-left);
+               margin-right: -0.75rem;
+          }
+
+          .stars {
+               color: #facc15;
+               display: flex;
+               font-size: 1rem;
+          }
+
+          .stars span {
+               font-size: 16px;
+          }
+
+          .form-section {
+               background-color: var(--bg-panel-right);
+               padding: 2rem;
+               display: flex;
+               flex-direction: column;
+               justify-content: center;
+               align-items: center;
+               position: relative;
+          }
+
+          @media (min-width: 768px) {
+               .form-section {
+                    padding: 4rem;
+               }
+          }
+
+          .form-wrapper {
+               width: 100%;
+               max-width: 400px;
+          }
+
+          .tabs-container {
+               background-color: var(--input-bg);
+               padding: 0.25rem;
+               border-radius: var(--radius-md);
+               display: flex;
+               margin-bottom: 2rem;
+          }
+
+          .tab-label {
+               flex: 1;
+               text-align: center;
+               padding: 0.625rem;
+               font-size: 0.875rem;
+               font-weight: 500;
+               color: var(--text-gray);
+               border-radius: 6px;
+               cursor: pointer;
+               transition: all 0.2s;
+          }
+
+          input[name="auth-mode"] {
+               display: none;
+          }
+
+          #login-tab-btn:checked~.tabs-container label[for="login-tab-btn"],
+          #signup-tab-btn:checked~.tabs-container label[for="signup-tab-btn"] {
+               background-color: #1f3127;
+               color: var(--text-white);
+               box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+          }
+
+          .login-view-only {
+               display: block;
+          }
+
+          .signup-view-only {
+               display: none;
+          }
+
+          .form-section:has(#signup-tab-btn:checked) .login-view-only {
+               display: none;
+          }
+
+          .form-section:has(#signup-tab-btn:checked) .signup-view-only {
+               display: block;
+          }
+
+          .form-section:has(#signup-tab-btn:checked) .signup-view-flex {
+               display: flex;
+          }
+
+          .signup-view-flex {
+               display: none;
+          }
+
+          .header-group {
+               margin-bottom: 2rem;
+          }
+
+          .header-group h2 {
+               font-size: 1.875rem;
+               font-weight: 700;
+               margin-bottom: 0.5rem;
+          }
+
+          .header-group p {
+               color: var(--text-gray);
+          }
+
+          .form-group {
+               margin-bottom: 1.25rem;
+               display: flex;
+               flex-direction: column;
+               gap: 0.375rem;
+          }
+
+          .form-group label {
+               font-size: 0.875rem;
+               font-weight: 500;
+               color: #e5e7eb;
+          }
+
+          .input-wrapper {
+               position: relative;
+          }
+
+          .auth-input {
+               width: 100%;
+               background-color: var(--input-bg);
+               border: 1px solid var(--border-color);
+               color: var(--text-white);
+               padding: 0.75rem 1rem;
+               border-radius: var(--radius-md);
+               font-size: 1rem;
+               outline: none;
+               transition: border-color 0.2s;
+               font-family: inherit;
+          }
+
+          .auth-input::placeholder {
+               color: #4b5563;
+          }
+
+          .auth-input:focus {
+               border-color: var(--primary-color);
+               box-shadow: 0 0 0 1px rgba(0, 230, 118, 0.1);
+          }
+
+          .auth-input:not(:placeholder-shown):valid {
+               border-color: var(--primary-color);
+          }
+
+          .auth-input:not(:placeholder-shown):invalid {
+               border-color: var(--error-color);
+          }
+
+          .input-icon {
+               position: absolute;
+               right: 0.75rem;
+               top: 50%;
+               transform: translateY(-50%);
+               color: var(--primary-color);
+               font-size: 1.25rem;
+               pointer-events: none;
+               opacity: 0;
+               transition: opacity 0.2s;
+          }
+
+          .input-wrapper:has(.auth-input:not(:placeholder-shown):valid) .icon-valid {
+               opacity: 1;
+          }
+
+          .input-wrapper:has(.auth-input:not(:placeholder-shown):invalid) .icon-invalid {
+               opacity: 1;
+               color: var(--error-color);
+          }
+
+          .field-error-msg {
+               font-size: 0.75rem;
+               color: var(--error-color);
+               margin-top: 0.25rem;
+               display: none;
+          }
+
+          .form-group:has(:invalid:not(:placeholder-shown)) .field-error-msg {
+               display: block;
+          }
+
+          .password-header {
+               display: flex;
+               justify-content: space-between;
+               align-items: center;
+          }
+
+          #forgot-password-link {
+               font-size: 0.75rem;
+               color: var(--primary-color);
+               text-decoration: none;
+               font-weight: 500;
+          }
+
+          #forgot-password-link:hover {
+               text-decoration: underline;
+          }
+
+          #sign-in-submit-btn {
+               width: 100%;
+               background-color: var(--primary-color);
+               color: var(--bg-panel-right);
+               font-weight: 700;
+               padding: 0.875rem;
+               border: none;
+               border-radius: var(--radius-md);
+               cursor: pointer;
+               display: flex;
+               align-items: center;
+               justify-content: center;
+               gap: 0.5rem;
+               font-size: 1rem;
+               margin-top: 1rem;
+               transition: background-color 0.2s, transform 0.1s;
+          }
+
+          #sign-in-submit-btn:hover {
+               background-color: var(--primary-hover);
+          }
+
+          #sign-in-submit-btn:active {
+               transform: scale(0.98);
+          }
+
+          .divider {
+               position: relative;
+               margin: 1.5rem 0;
+               text-align: center;
+          }
+
+          .divider::before {
+               content: '';
+               position: absolute;
+               left: 0;
+               top: 50%;
+               width: 100%;
+               height: 1px;
+               background-color: var(--border-color);
+               z-index: 0;
+          }
+
+          .divider span {
+               position: relative;
+               background-color: var(--bg-panel-right);
+               padding: 0 0.5rem;
+               color: var(--text-gray);
+               font-size: 0.875rem;
+               z-index: 1;
+          }
+
+          .social-grid {
+               display: grid;
+               grid-template-columns: 1fr 1fr;
+               gap: 0.75rem;
+          }
+
+          .social-btn {
+               display: flex;
+               align-items: center;
+               justify-content: center;
+               gap: 0.5rem;
+               padding: 0.625rem;
+               background-color: var(--input-bg);
+               border: 1px solid var(--border-color);
+               border-radius: var(--radius-md);
+               color: var(--text-white);
+               font-size: 0.875rem;
+               font-weight: 500;
+               cursor: pointer;
+               transition: background-color 0.2s;
+          }
+
+          .social-btn:hover {
+               background-color: #1f3127;
+          }
+
+          .social-btn svg {
+               width: 20px;
+               height: 20px;
+               fill: currentColor;
+          }
+
+          .auth-footer {
+               margin-top: 1.5rem;
+               text-align: center;
+               font-size: 0.875rem;
+               color: var(--text-gray);
+          }
+
+          .link-text {
+               color: var(--primary-color);
+               font-weight: 600;
+               cursor: pointer;
+               text-decoration: none;
+          }
+
+          .link-text:hover {
+               text-decoration: underline;
+          }
+     </style> 
+</head>
+
+<body>
+     <div class="container">
+          <div class="brand-section">
+               <div class="bg-image">
+                    <img alt="Fitness Background"
+                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8cZkK7sT5YuIhx7f-fhyKcI_LgkDzwTDPhkwAt9EZEY_naVAZB65Rt3gKopcQ1EMC9qbakMuFe-Xq8B06UypBFvDQ-l6vGNAA7qnYF4oZwcb-pg_IYNt7gr0oUTn0v-T405swgVN9NnX9QKLWnPY9YsKXqKAffYFAottUXwgQSLoaggqB8lUNKPpig9DOXIxCyWOHu9kBlzgwH0U04Ayl3LfXCpd1pX0zsE_LUVJFe8UQHRQDU79oLJS2imAtGNZ_oXApUIAl2489"
+                         style="width: 100%; height: 100%; object-fit: cover;" />
+               </div>
+               <div class="bg-gradient"></div>
+               <div class="brand-content logo-wrapper">
+                    <div class="logo-icon">
+                         <span class="material-symbols-outlined" style="color: #00e676;">fitness_center</span>
+                    </div>
+                    <span class="logo-text">Fitness Tracker</span>
+               </div>
+               <div class="brand-content hero-text">
+                    <h1>
+                         Track your progress, <br />
+                         <span class="text-gradient">crush your goals.</span>
+                    </h1>
+                    <p class="hero-desc">
+                         Your journey to a healthier you starts here. Join thousands of users achieving their best
+                         selves.
+                    </p>
+                    <div class="testimonials">
+                         <div class="avatar-group">
+                              <img alt="User 1" class="avatar"
+                                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuCR0zkaJOi3hMjIyHdJIxvxWIVjAKLUx2tLsZkqP4EpbT6O_nE8h5YNCn4iM2mzmh2gvHu5AJ1ZDJk_2ABhVJYoZw4jFs_q3WAwszdgq4TdR4TqRUt4VNImup6Qq8DZVYY32qu1tPACkWf8NuG1tEKn-c2__rfRm3BmANEgGHJJRsvI5POiw-_z1POZuuY3DKwri7eyUK_WxUavndkvomSRuOhOUm9CfvebXcLlr7O_Yr1Tcm0EMq0qE3Lb2y0_fL89Oc0--ojrZ90d" />
+                              <img alt="User 2" class="avatar"
+                                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuCv0fcUhqjfE0hX3hpNZ1LDf2skDKD3e3F5QaGF69vokGcb4QnQVl6qIYO8kzanZJ8d8DfcmKCNexZPJwOW18dMQUT0X_-e4UPg49AZgI0VsO0TwUuCKgWZmb9Kq_1UTOj-xM3FFyC2xuUCqrZbMjrJCKIG3M0oidsgNqvlHb-4K4pp8SnB6ZpQ4UZAN3lPYGE6tlyEL8HB_uPRF3SYT_-18CWYfiVi9cX43wgzwhDNYdlawTIv-Qk4wWjLG7K8FyOVFHb1ANCgFyeE" />
+                              <img alt="User 3" class="avatar"
+                                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7K50ukOYTCYYapaMjxG0Y3D168E1fmAE7SrW9TXafM54cavC5WH7IrM8CaGolMkYC86QadhzP3WDaKRj8R9k_MjihuutI8SU3viB_wBFh_t7O_64TBHpiINIlR_wuncIPhkmlT7HORvlvxSO6r-73xvUhXbFiy-cc-raLMepfIKA65XI8-mQKo0ZlfRjFZV_9xJLVvrh626NWDdCfnq_bwfl9umVX_E4AHcSWRFHART4qi-x_jNBgvGSv4tWf3eiE1O0ZftFSwLc5" />
+                         </div>
+                         <div>
+                              <div class="stars">
+                                   <span class="material-symbols-outlined">star</span>
+                                   <span class="material-symbols-outlined">star</span>
+                                   <span class="material-symbols-outlined">star</span>
+                                   <span class="material-symbols-outlined">star</span>
+                                   <span class="material-symbols-outlined">star</span>
+                              </div>
+                              <div style="font-size: 0.75rem; color: #9ca3af; font-weight: 500; margin-top: 2px;">
+                                   Trusted by 10,000+ athletes
+                              </div>
+                         </div>
+                    </div>
+               </div>
+          </div>
+          <div class="form-section">
+               <div class="form-wrapper">
+                    <input checked="" id="login-tab-btn" name="auth-mode" type="radio" value="Login" />
+                    <input id="signup-tab-btn" name="auth-mode" type="radio" value="Sign Up" />
+                    <div class="tabs-container">
+                         <label class="tab-label" for="login-tab-btn">Login</label>
+                         <label class="tab-label" for="signup-tab-btn">Sign Up</label>
+                    </div>
+                    <div class="header-group">
+                         <h2 class="login-view-only">Welcome Back</h2>
+                         <h2 class="signup-view-only">Create Account</h2>
+                         <p class="login-view-only">Enter your details to access your account.</p>
+                         <p class="signup-view-only">Start your 30-day free trial today.</p>
+                    </div>
+                    <form id="auth-form" onsubmit="event.preventDefault();">
+                         <div class="form-group signup-view-only">
+                              <label for="auth-name">Full Name</label>
+                              <div class="input-wrapper">
+                                   <input class="auth-input" id="auth-name" placeholder="John Doe" type="text" />
+                                   <span class="material-symbols-outlined input-icon"
+                                        style="opacity: 0.5; color: #9ca3af;">person</span>
+                              </div>
+                         </div>
+                         <div class="form-group">
+                              <label for="email-input">Email Address</label>
+                              <div class="input-wrapper">
+                                   <input class="auth-input" id="email-input"
+                                        pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" placeholder="name@example.com"
+                                        required="" type="email" />
+                                   <span class="material-symbols-outlined input-icon icon-valid">check_circle</span>
+                                   <span class="material-symbols-outlined input-icon icon-invalid">error</span>
+                              </div>
+                              <p class="field-error-msg">Please enter a valid email address.</p>
+                         </div>
+                         <div class="form-group">
+                              <div class="password-header">
+                                   <label for="password-input">Password</label>
+                                   <a class="login-view-only" href="#" id="forgot-password-link">Forgot Password?</a>
+                              </div>
+                              <div class="input-wrapper">
+                                   <input class="auth-input" id="password-input" minlength="8" placeholder="••••••••"
+                                        required="" type="password" />
+                                   <span class="material-symbols-outlined input-icon icon-valid">check_circle</span>
+                              </div>
+                              <p class="field-error-msg">Must be at least 8 characters.</p>
+                         </div>
+                         <button id="sign-in-submit-btn" type="submit">
+                              <span class="login-view-only">Sign In</span>
+                              <span class="signup-view-only">Create Account</span>
+                              <span class="material-symbols-outlined" style="font-size: 20px;">arrow_forward</span>
+                         </button>
+                    </form>
+                    <div class="divider">
+                         <span>Or continue with</span>
+                    </div>
+                    <div class="social-grid">
+                         <button class="social-btn" id="google-login-btn" type="button">
+                              <svg viewBox="0 0 24 24">
+                                   <path
+                                        d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z">
+                                   </path>
+                              </svg>
+                              Google
+                         </button>
+                         <button class="social-btn" id="facebook-login-btn" type="button">
+                              <svg viewBox="0 0 24 24">
+                                   <path
+                                        d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z">
+                                   </path>
+                              </svg>
+                              Facebook
+                         </button>
+                    </div>
+                    <div class="auth-footer">
+                         <span class="login-view-only">
+                              Don't have an account?
+                              <label class="link-text" for="signup-tab-btn" id="toggle-signup-link">Sign up</label>
+                         </span>
+                         <span class="signup-view-only">
+                              Already have an account?
+                              <label class="link-text" for="login-tab-btn">Log in</label>
+                         </span>
+                    </div>
+               </div>
+          </div>
+     </div>
+     <script src="app.js"></script>
+</body>
+
+</html>
