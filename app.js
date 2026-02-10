@@ -1,3 +1,51 @@
+/* ================================
+   GLOBAL HELPERS
+   ================================ */
+
+function showToast(message, type = "normal") {
+     let container = document.querySelector(".toast-container");
+     if (!container) {
+          container = document.createElement("div");
+          container.className = "toast-container";
+          document.body.appendChild(container);
+     }
+
+     const toast = document.createElement("div");
+     toast.className = "toast";
+
+     if (type === "success") toast.classList.add("toast-success");
+     if (type === "error") toast.classList.add("toast-error");
+
+     // Icon based on type
+     let icon = "info";
+     if (type === "success") icon = "check_circle";
+     if (type === "error") icon = "error";
+
+     const iconSpan = document.createElement('span');
+     iconSpan.className = 'material-symbols-outlined';
+     iconSpan.style.fontSize = '20px';
+     iconSpan.textContent = icon;
+
+     const msgSpan = document.createElement('span');
+     msgSpan.textContent = message;
+
+     toast.appendChild(iconSpan);
+     toast.appendChild(msgSpan);
+
+     container.appendChild(toast);
+
+     // Auto remove
+     setTimeout(() => {
+          toast.classList.add("fade-out");
+          toast.addEventListener("animationend", () => {
+               toast.remove();
+               if (container.children.length === 0) {
+                    container.remove();
+               }
+          });
+     }, 3000);
+}
+
 
 (function () {
      // helper
@@ -121,7 +169,7 @@
                const calories = calIn ? Number(calIn.value) : 0;
 
                if (!name) {
-                    alert('Enter workout name');
+                    showToast('Enter workout name', 'error');
                     return;
                }
 
@@ -140,7 +188,7 @@
                renderRecentActivity();
                updateStatCards();
 
-               alert('Workout added successfully');
+               showToast('Workout added successfully', 'success');
           });
      }
 
@@ -149,13 +197,13 @@
           calcBmiBtn.addEventListener('click', () => {
                const h = Number(heightEl.value);
                const w = Number(weightEl.value);
-               if (!h || !w) { alert('Enter valid height and weight'); return; }
+               if (!h || !w) { showToast('Enter valid height and weight', 'error'); return; }
                const bmi = +(w / ((h / 100) * (h / 100))).toFixed(1);
                const cat = bmi < 18.5 ? 'Underweight' : (bmi < 25 ? 'Normal' : (bmi < 30 ? 'Overweight' : 'Obese'));
                bmiResultEl.textContent = bmi;
                bmiCategoryEl.textContent = cat;
                storage.push('bmiHistory', { bmi, height: h, weight: w, ts: Date.now() });
-               alert('BMI calculated and saved');
+               showToast('BMI calculated and saved', 'success');
                // update dashboard widgets, if desired
                updateStatCards();
           });
@@ -361,7 +409,7 @@
           const weight = Number(weightInput.value);
 
           if (!height || !weight) {
-               alert("Please enter valid height and weight");
+               showToast("Please enter valid height and weight", "error");
                return;
           }
 
@@ -392,7 +440,7 @@
           historyBtn.addEventListener("click", () => {
                const history = get("bmiHistory");
                if (!history.length) {
-                    alert("No BMI history yet");
+                    showToast("No BMI history yet", "info");
                     return;
                }
 
@@ -400,7 +448,7 @@
                     .map(h => `${h.bmi} (${h.category})`)
                     .join("\n");
 
-               alert("Last BMI Records:\n\n" + last);
+               showToast("Last BMI Records:\n\n" + last, "info");
           });
      }
 
@@ -504,7 +552,7 @@
 
           set("workoutTemplates", templates);
 
-          alert("Workout plan saved.\n(For assignment purpose)");
+          showToast("Workout plan saved.", "success");
      });
 
 })();
@@ -600,7 +648,7 @@
           weightEl.textContent = profile.weight;
           locationEl.textContent = profile.location;
 
-          alert("Profile updated successfully");
+          showToast("Profile updated successfully", "success");
      });
 
      function saveSettings() {
@@ -625,8 +673,10 @@
      /* ---------- Logout ---------- */
      logoutBtn.addEventListener("click", () => {
           localStorage.removeItem("currentUser");
-          alert("Logged out successfully");
-          window.location.href = "Login.html";
+          showToast("Logged out successfully", "success");
+          setTimeout(() => {
+               window.location.href = "Login.html";
+          }, 1500);
      });
 
 })();
@@ -673,7 +723,7 @@
           const password = passwordInput.value.trim();
 
           if (!email || !password) {
-               alert("Email and password are required");
+               showToast("Email and password are required", "error");
                return;
           }
 
@@ -683,13 +733,13 @@
                // SIGN UP
                const name = nameInput.value.trim();
                if (!name) {
-                    alert("Name is required for signup");
+                    showToast("Name is required for signup", "error");
                     return;
                }
 
                const exists = users.find(u => u.email === email);
                if (exists) {
-                    alert("User already exists. Please login.");
+                    showToast("User already exists. Please login.", "error");
                     return;
                }
 
@@ -714,8 +764,10 @@
                     location: "—"
                });
 
-               alert("Account created successfully");
-               window.location.href = "Dashboard.html";
+               showToast("Account created successfully", "success");
+               setTimeout(() => {
+                    window.location.href = "Dashboard.html";
+               }, 1500);
 
           } else {
                const hashedPassword = await hashPassword(password);
@@ -724,22 +776,24 @@
                );
 
                if (!user) {
-                    alert("Invalid email or password");
+                    showToast("Invalid email or password", "error");
                     return;
                }
 
                set("currentUser", user);
-               alert("Login successful");
-               window.location.href = "Dashboard.html";
+               showToast("Login successful", "success");
+               setTimeout(() => {
+                    window.location.href = "Dashboard.html";
+               }, 1500);
           }
      });
 
      googleBtn.addEventListener("click", () => {
-          alert("Google login is mocked for this project");
+          showToast("Google login is mocked for this project", "info");
      });
 
      facebookBtn.addEventListener("click", () => {
-          alert("Facebook login is mocked for this project");
+          showToast("Facebook login is mocked for this project", "info");
      });
 
 })();

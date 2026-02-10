@@ -1,0 +1,9 @@
+127.0.0.1 - - [10/Feb/2026 17:27:49] "GET /Dashboard.html HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 17:27:49] "GET /styles.css HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 17:27:49] "GET /app.js HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 17:27:52] "GET /Dashboard.html HTTP/1.1" 304 -
+127.0.0.1 - - [10/Feb/2026 17:29:58] "GET /Dashboard.html HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 17:29:58] "GET /app.js HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 17:29:58] "GET /styles.css HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 17:30:00] "GET /Dashboard.html HTTP/1.1" 304 -
+127.0.0.1 - - [10/Feb/2026 17:30:00] "GET /app.js HTTP/1.1" 304 -
