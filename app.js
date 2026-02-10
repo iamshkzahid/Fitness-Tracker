@@ -3,7 +3,6 @@
      // helper
      function $(sel, root = document) { return root.querySelector(sel); }
      function $$(sel, root = document) { return Array.from((root || document).querySelectorAll(sel)); }
-     function safeParse(s, fallback) { try { return JSON.parse(s); } catch (e) { return fallback; } }
 
      if (!($('#addWorkoutBtn') || $('.activity-table'))) return;
 
@@ -17,21 +16,7 @@
 
 
      // ===== storage helpers =====
-     const storage = {
-          get(key, fallback) {
-               const raw = localStorage.getItem(key);
-               if (!raw) return fallback;
-               return safeParse(raw, fallback);
-          },
-          set(key, val) {
-               localStorage.setItem(key, JSON.stringify(val));
-          },
-          push(key, item) {
-               const arr = storage.get(key, []);
-               arr.push(item);
-               storage.set(key, arr);
-          }
-     };
+     // storage is now loaded from utils.js
 
      // ===== Elements =====
      const nameIn = $('#workoutName');
