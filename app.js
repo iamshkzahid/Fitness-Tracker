@@ -66,8 +66,8 @@
                return;
           }
 
-          const recent = workouts.slice().reverse();
-          recent.forEach(w => {
+          for (let i = workouts.length - 1; i >= 0; i--) {
+               const w = workouts[i];
                const tr = document.createElement('tr');
                const dateStr = w.ts ? new Date(w.ts).toLocaleString() : 'Unknown';
                const duration = w.duration ? `${w.duration} min` : '-';
@@ -85,7 +85,7 @@
         <td class="text-right"><span class="status-badge">COMPLETED</span></td>
       `;
                activityTbody.appendChild(tr);
-          });
+          }
      }
 
      function updateStatCards() {
