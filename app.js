@@ -1,4 +1,18 @@
 
+const STORAGE_KEYS = {
+     CURRENT_USER: 'currentUser',
+     WORKOUTS: 'workouts',
+     AVG_HR: 'avgHR',
+     WATER_TODAY: 'waterToday',
+     BMI_HISTORY: 'bmiHistory',
+     PLANNER_DATA: 'plannerData',
+     EXERCISE_DATA: 'exerciseData',
+     WORKOUT_TEMPLATES: 'workoutTemplates',
+     PROFILE_DATA: 'profileData',
+     PROFILE_SETTINGS: 'profileSettings',
+     USERS: 'users'
+};
+
 (function () {
      // helper
      function $(sel, root = document) { return root.querySelector(sel); }
@@ -9,7 +23,7 @@
 
      // ===== Dynamic Welcome Username =====
      const usernameSpan = document.getElementById("dashboard-username");
-     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+     const currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_USER));
 
      if (usernameSpan && currentUser && currentUser.name) {
           usernameSpan.textContent = currentUser.name;
@@ -57,7 +71,7 @@
           if (!activityTbody) return;
           // clear all rows
           activityTbody.innerHTML = '';
-          const workouts = storage.get('workouts', []);
+          const workouts = storage.get(STORAGE_KEYS.WORKOUTS, []);
           if (!workouts || workouts.length === 0) {
               
                const tr = document.createElement('tr');
@@ -89,15 +103,15 @@
      }
 
      function updateStatCards() {
-          const workouts = storage.get('workouts', []);
+          const workouts = storage.get(STORAGE_KEYS.WORKOUTS, []);
           // calories total
           const totalCalories = workouts.reduce((s, w) => s + (Number(w.calories) || 0), 0);
           // active minutes total
           const totalMinutes = workouts.reduce((s, w) => s + (Number(w.duration) || 0), 0);
           // average heart rate – we don't have HR stored; keep UI unchanged if no data
-          const avgHR = storage.get('avgHR', null); 
+          const avgHR = storage.get(STORAGE_KEYS.AVG_HR, null);
         
-          const water = storage.get('waterToday', null);
+          const water = storage.get(STORAGE_KEYS.WATER_TODAY, null);
 
           if (statValues && statValues.length >= 4) {
                statValues[0].textContent = `${totalCalories.toLocaleString()} `;
@@ -136,7 +150,7 @@
                }
 
                const obj = { name, duration, calories, ts: Date.now() };
-               storage.push('workouts', obj);
+               storage.push(STORAGE_KEYS.WORKOUTS, obj);
 
                if (nameIn) nameIn.value = '';
                if (durIn) durIn.value = '';
@@ -159,7 +173,7 @@
                const cat = bmi < 18.5 ? 'Underweight' : (bmi < 25 ? 'Normal' : (bmi < 30 ? 'Overweight' : 'Obese'));
                bmiResultEl.textContent = bmi;
                bmiCategoryEl.textContent = cat;
-               storage.push('bmiHistory', { bmi, height: h, weight: w, ts: Date.now() });
+               storage.push(STORAGE_KEYS.BMI_HISTORY, { bmi, height: h, weight: w, ts: Date.now() });
                alert('BMI calculated and saved');
                // update dashboard widgets, if desired
                updateStatCards();
@@ -205,8 +219,8 @@
           }
      };
 
-     const workouts = get("workouts"); 
-     const bmiHistory = get("bmiHistory");
+     const workouts = get(STORAGE_KEYS.WORKOUTS);
+     const bmiHistory = get(STORAGE_KEYS.BMI_HISTORY);
 
      const chartContainer = document.getElementById("monthly-chart-container");
 
@@ -348,9 +362,9 @@
      };
 
      const saveBMI = (entry) => {
-          const history = get("bmiHistory");
+          const history = get(STORAGE_KEYS.BMI_HISTORY);
           history.push(entry);
-          localStorage.setItem("bmiHistory", JSON.stringify(history));
+          localStorage.setItem(STORAGE_KEYS.BMI_HISTORY, JSON.stringify(history));
      };
 
      function getCategory(bmi) {
@@ -395,7 +409,7 @@
 
      if (historyBtn) {
           historyBtn.addEventListener("click", () => {
-               const history = get("bmiHistory");
+               const history = get(STORAGE_KEYS.BMI_HISTORY);
                if (!history.length) {
                     alert("No BMI history yet");
                     return;
@@ -427,7 +441,7 @@
 
      /* ---------- Calendar Day Logic ---------- */
      const days = document.querySelectorAll(".calendar-day");
-     const plannerData = get("plannerData", {});
+     const plannerData = get(STORAGE_KEYS.PLANNER_DATA, {});
 
      days.forEach(day => {
           const dayId = day.id;
@@ -453,7 +467,7 @@
                     ts: Date.now()
                };
 
-               set("plannerData", plannerData);
+               set(STORAGE_KEYS.PLANNER_DATA, plannerData);
 
                day.classList.add("day-has-workout");
                const indicator = day.querySelector(".day-indicator");
@@ -462,7 +476,7 @@
      });
 
      const exerciseInputs = document.querySelectorAll(".mini-input");
-     const exerciseData = get("exerciseData", {});
+     const exerciseData = get(STORAGE_KEYS.EXERCISE_DATA, {});
 
      exerciseInputs.forEach(input => {
           const key = input.id;
@@ -474,7 +488,7 @@
           // Save on change
           input.addEventListener("change", () => {
                exerciseData[key] = input.value;
-               set("exerciseData", exerciseData);
+               set(STORAGE_KEYS.EXERCISE_DATA, exerciseData);
           });
      });
 
@@ -488,7 +502,7 @@
 
           if (!name || !type || !duration) return;
 
-          const templates = get("workoutTemplates", []);
+          const templates = get(STORAGE_KEYS.WORKOUT_TEMPLATES, []);
           templates.push({
                name,
                type,
@@ -496,7 +510,7 @@
                ts: Date.now()
           });
 
-          set("workoutTemplates", templates);
+          set(STORAGE_KEYS.WORKOUT_TEMPLATES, templates);
 
           alert("Workout plan saved.\n(For assignment purpose)");
      });
@@ -533,7 +547,7 @@
      const unitsSelect = document.getElementById("units-system-select");
      const darkModeToggle = document.getElementById("dark-mode-toggle");
 
-     const profile = get("profileData", {
+     const profile = get(STORAGE_KEYS.PROFILE_DATA, {
           name: "Alex Log.",
           email: "alex.log@example.com",
           age: "28 years",
@@ -549,7 +563,7 @@
      weightEl.textContent = profile.weight;
      locationEl.textContent = profile.location;
 
-     const settings = get("profileSettings", {
+     const settings = get(STORAGE_KEYS.PROFILE_SETTINGS, {
           notifications: true,
           publicProfile: false,
           units: "Metric (kg, cm)",
@@ -585,7 +599,7 @@
           profile.weight = weight || profile.weight;
           profile.location = location || profile.location;
 
-          set("profileData", profile);
+          set(STORAGE_KEYS.PROFILE_DATA, profile);
 
           nameEl.textContent = profile.name;
           emailEl.textContent = profile.email;
@@ -600,7 +614,7 @@
      function saveSettings() {
           const isDark = darkModeToggle.checked;
 
-          set("profileSettings", {
+          set(STORAGE_KEYS.PROFILE_SETTINGS, {
                notifications: notifToggle.checked,
                publicProfile: publicToggle.checked,
                units: unitsSelect.value,
@@ -618,7 +632,7 @@
 
      /* ---------- Logout ---------- */
      logoutBtn.addEventListener("click", () => {
-          localStorage.removeItem("currentUser");
+          localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
           alert("Logged out successfully");
           window.location.href = "Login.html";
      });
@@ -663,7 +677,7 @@
                return;
           }
 
-          let users = get("users", []);
+          let users = get(STORAGE_KEYS.USERS, []);
 
           if (isSignup) {
                // SIGN UP
@@ -687,10 +701,10 @@
                };
 
                users.push(newUser);
-               set("users", users);
-               set("currentUser", newUser);
+               set(STORAGE_KEYS.USERS, users);
+               set(STORAGE_KEYS.CURRENT_USER, newUser);
 
-               set("profileData", {
+               set(STORAGE_KEYS.PROFILE_DATA, {
                     name: newUser.name,
                     email: newUser.email,
                     age: "—",
@@ -712,7 +726,7 @@
                     return;
                }
 
-               set("currentUser", user);
+               set(STORAGE_KEYS.CURRENT_USER, user);
                alert("Login successful");
                window.location.href = "Dashboard.html";
           }
