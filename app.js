@@ -135,6 +135,11 @@
                     return;
                }
 
+               if (duration <= 0 || calories <= 0) {
+                    alert('Please enter valid positive numbers for duration and calories');
+                    return;
+               }
+
                const obj = { name, duration, calories, ts: Date.now() };
                storage.push('workouts', obj);
 
@@ -473,6 +478,12 @@
 
           // Save on change
           input.addEventListener("change", () => {
+               const val = Number(input.value);
+               if (val < 0) {
+                    alert('Please enter a non-negative value');
+                    input.value = exerciseData[key] !== undefined ? exerciseData[key] : input.defaultValue;
+                    return;
+               }
                exerciseData[key] = input.value;
                set("exerciseData", exerciseData);
           });
@@ -487,6 +498,11 @@
           const duration = prompt("Estimated duration (mins):");
 
           if (!name || !type || !duration) return;
+
+          if (Number(duration) <= 0) {
+               alert('Please enter a valid duration');
+               return;
+          }
 
           const templates = get("workoutTemplates", []);
           templates.push({
