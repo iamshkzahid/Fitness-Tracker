@@ -668,7 +668,15 @@
      };
      const set = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
-     form.addEventListener("submit", () => {
+     async function hashPassword(password) {
+          const msgBuffer = new TextEncoder().encode(password);
+          const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+          return hashHex;
+     }
+
+     form.addEventListener("submit", async () => {
           const isSignup = signupTab.checked;
 
           const email = emailInput.value.trim();
@@ -695,10 +703,11 @@
                     return;
                }
 
+               const hashedPassword = await hashPassword(password);
                const newUser = {
                     name,
                     email,
-                    password, 
+                    password: hashedPassword,
                     createdAt: Date.now()
                };
 
@@ -719,8 +728,9 @@
                window.location.href = "Dashboard.html";
 
           } else {
+               const hashedPassword = await hashPassword(password);
                const user = users.find(
-                    u => u.email === email && u.password === password
+                    u => u.email === email && u.password === hashedPassword
                );
 
                if (!user) {
