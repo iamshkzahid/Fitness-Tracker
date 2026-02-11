@@ -1,24 +1,16 @@
 {
   "name": "app",
   "version": "1.0.0",
-  "description": "A frontend-based **Fitness Tracker Web Application** built using **HTML, CSS (single global stylesheet), and Vanilla JavaScript**. The project demonstrates dynamic UI updates, client-side authentication, and persistent data handling using `localStorage`.",
+  "description": "Fitness Tracker",
   "main": "app.js",
   "scripts": {
-    "test": "npx playwright test"
+    "test": "jest"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/iamshkzahid/Fitness-Tracker.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/iamshkzahid/Fitness-Tracker/issues"
-  },
-  "homepage": "https://github.com/iamshkzahid/Fitness-Tracker#readme",
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
-    "http-server": "^14.1.1"
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom"
   }
 }

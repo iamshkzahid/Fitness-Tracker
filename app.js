@@ -70,15 +70,6 @@ function showToast(message, type = "normal") {
      // helper
      function $(sel, root = document) { return root.querySelector(sel); }
      function $$(sel, root = document) { return Array.from((root || document).querySelectorAll(sel)); }
-     function escapeHtml(unsafe) {
-          if (unsafe === null || unsafe === undefined) return '';
-          return String(unsafe)
-               .replace(/&/g, '&amp;')
-               .replace(/</g, '&lt;')
-               .replace(/>/g, '&gt;')
-               .replace(/"/g, '&quot;')
-               .replace(/'/g, '&#039;');
-     }
 
      if (!($('#addWorkoutBtn') || $('.activity-table'))) return;
 
@@ -89,6 +80,10 @@ function showToast(message, type = "normal") {
      if (usernameSpan && currentUser && currentUser.name) {
           usernameSpan.textContent = currentUser.name;
      }
+
+
+     // ===== storage helpers =====
+     // storage is now loaded from utils.js
 
      // ===== Elements =====
      const nameIn = $('#workoutName');

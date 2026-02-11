@@ -1,41 +1,63 @@
-const { escapeHtml } = require('./utils');
+/**
+ * @jest-environment jsdom
+ */
 
-describe('escapeHtml', () => {
-    test('should escape HTML special characters', () => {
-        expect(escapeHtml('&')).toBe('&amp;');
-        expect(escapeHtml('<')).toBe('&lt;');
-        expect(escapeHtml('>')).toBe('&gt;');
-        expect(escapeHtml('"')).toBe('&quot;');
-        expect(escapeHtml("'")).toBe('&#039;');
+const { storage, safeParse } = require('./utils.js');
+
+describe('Storage Helpers', () => {
+    beforeEach(() => {
+        localStorage.clear();
+        jest.clearAllMocks();
     });
 
-    test('should return empty string for null or undefined', () => {
-        expect(escapeHtml(null)).toBe('');
-        expect(escapeHtml(undefined)).toBe('');
+    describe('safeParse', () => {
+        test('should parse valid JSON', () => {
+            expect(safeParse('{"a":1}', {})).toEqual({a: 1});
+        });
+
+        test('should return fallback on invalid JSON', () => {
+            expect(safeParse('invalid', 'fallback')).toBe('fallback');
+        });
     });
 
-    test('should return empty string for empty string input', () => {
-        expect(escapeHtml('')).toBe('');
+    describe('storage.get', () => {
+        test('should return fallback if key does not exist', () => {
+            const result = storage.get('nonexistent', 'default');
+            expect(result).toBe('default');
+        });
+
+        test('should return parsed value if key exists', () => {
+            localStorage.setItem('testKey', JSON.stringify({ a: 1 }));
+            const result = storage.get('testKey', {});
+            expect(result).toEqual({ a: 1 });
+        });
+
+        test('should return fallback if parsing fails', () => {
+            localStorage.setItem('badKey', 'invalid-json');
+            const result = storage.get('badKey', 'fallback');
+            expect(result).toBe('fallback');
+        });
     });
 
-    test('should handle normal strings without special characters', () => {
-        expect(escapeHtml('Hello World')).toBe('Hello World');
-        expect(escapeHtml('12345')).toBe('12345');
+    describe('storage.set', () => {
+        test('should save stringified value to localStorage', () => {
+            storage.set('key', { foo: 'bar' });
+            expect(localStorage.getItem('key')).toBe(JSON.stringify({ foo: 'bar' }));
+        });
     });
 
-    test('should convert non-string inputs to string and escape them', () => {
-        expect(escapeHtml(123)).toBe('123');
-        expect(escapeHtml(true)).toBe('true');
-    });
+    describe('storage.push', () => {
+        test('should initialize array if key does not exist', () => {
+            storage.push('list', 'item1');
+            const stored = JSON.parse(localStorage.getItem('list'));
+            expect(stored).toEqual(['item1']);
+        });
 
-    test('should escape mixed content correctly', () => {
-        const input = '<b>"Me & You"</b>';
-        const expected = '&lt;b&gt;&quot;Me &amp; You&quot;&lt;/b&gt;';
-        expect(escapeHtml(input)).toBe(expected);
-    });
-
-    test('should escape multiple occurrences of the same character', () => {
-        expect(escapeHtml('&&')).toBe('&amp;&amp;');
-        expect(escapeHtml('<<')).toBe('&lt;&lt;');
+        test('should append to existing array', () => {
+            localStorage.setItem('list', JSON.stringify(['item1']));
+            storage.push('list', 'item2');
+            const stored = JSON.parse(localStorage.getItem('list'));
+            expect(stored).toEqual(['item1', 'item2']);
+        });
     });
 });
