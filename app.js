@@ -1,3 +1,51 @@
+/* ================================
+   GLOBAL HELPERS
+   ================================ */
+
+function showToast(message, type = "normal") {
+     let container = document.querySelector(".toast-container");
+     if (!container) {
+          container = document.createElement("div");
+          container.className = "toast-container";
+          document.body.appendChild(container);
+     }
+
+     const toast = document.createElement("div");
+     toast.className = "toast";
+
+     if (type === "success") toast.classList.add("toast-success");
+     if (type === "error") toast.classList.add("toast-error");
+
+     // Icon based on type
+     let icon = "info";
+     if (type === "success") icon = "check_circle";
+     if (type === "error") icon = "error";
+
+     const iconSpan = document.createElement('span');
+     iconSpan.className = 'material-symbols-outlined';
+     iconSpan.style.fontSize = '20px';
+     iconSpan.textContent = icon;
+
+     const msgSpan = document.createElement('span');
+     msgSpan.textContent = message;
+
+     toast.appendChild(iconSpan);
+     toast.appendChild(msgSpan);
+
+     container.appendChild(toast);
+
+     // Auto remove
+     setTimeout(() => {
+          toast.classList.add("fade-out");
+          toast.addEventListener("animationend", () => {
+               toast.remove();
+               if (container.children.length === 0) {
+                    container.remove();
+               }
+          });
+     }, 3000);
+}
+
 
 (function () {
      // helper
@@ -66,8 +114,8 @@
                return;
           }
 
-          const recent = workouts.slice().reverse();
-          recent.forEach(w => {
+          for (let i = workouts.length - 1; i >= 0; i--) {
+               const w = workouts[i];
                const tr = document.createElement('tr');
                const dateStr = w.ts ? new Date(w.ts).toLocaleString() : 'Unknown';
                const duration = w.duration ? `${w.duration} min` : '-';
@@ -85,7 +133,7 @@
         <td class="text-right"><span class="status-badge">COMPLETED</span></td>
       `;
                activityTbody.appendChild(tr);
-          });
+          }
      }
 
      function updateStatCards() {
@@ -113,16 +161,6 @@
           }
      }
 
-     function escapeHtml(unsafe) {
-          if (unsafe === null || unsafe === undefined) return '';
-          return String(unsafe)
-               .replace(/&/g, '&amp;')
-               .replace(/</g, '&lt;')
-               .replace(/>/g, '&gt;')
-               .replace(/"/g, '&quot;')
-               .replace(/'/g, '&#039;');
-     }
-
      // ===== Add workout event =====
      if (addBtn) {
           addBtn.addEventListener('click', () => {
@@ -131,7 +169,12 @@
                const calories = calIn ? Number(calIn.value) : 0;
 
                if (!name) {
-                    alert('Enter workout name');
+                    showToast('Enter workout name', 'error');
+                    return;
+               }
+
+               if (duration <= 0 || calories <= 0) {
+                    alert('Please enter valid positive numbers for duration and calories');
                     return;
                }
 
@@ -145,7 +188,7 @@
                renderRecentActivity();
                updateStatCards();
 
-               alert('Workout added successfully');
+               showToast('Workout added successfully', 'success');
           });
      }
 
@@ -154,13 +197,13 @@
           calcBmiBtn.addEventListener('click', () => {
                const h = Number(heightEl.value);
                const w = Number(weightEl.value);
-               if (!h || !w) { alert('Enter valid height and weight'); return; }
+               if (!h || !w) { showToast('Enter valid height and weight', 'error'); return; }
                const bmi = +(w / ((h / 100) * (h / 100))).toFixed(1);
                const cat = bmi < 18.5 ? 'Underweight' : (bmi < 25 ? 'Normal' : (bmi < 30 ? 'Overweight' : 'Obese'));
                bmiResultEl.textContent = bmi;
                bmiCategoryEl.textContent = cat;
                storage.push('bmiHistory', { bmi, height: h, weight: w, ts: Date.now() });
-               alert('BMI calculated and saved');
+               showToast('BMI calculated and saved', 'success');
                // update dashboard widgets, if desired
                updateStatCards();
           });
@@ -366,7 +409,7 @@
           const weight = Number(weightInput.value);
 
           if (!height || !weight) {
-               alert("Please enter valid height and weight");
+               showToast("Please enter valid height and weight", "error");
                return;
           }
 
@@ -397,7 +440,7 @@
           historyBtn.addEventListener("click", () => {
                const history = get("bmiHistory");
                if (!history.length) {
-                    alert("No BMI history yet");
+                    showToast("No BMI history yet", "info");
                     return;
                }
 
@@ -405,7 +448,7 @@
                     .map(h => `${h.bmi} (${h.category})`)
                     .join("\n");
 
-               alert("Last BMI Records:\n\n" + last);
+               showToast("Last BMI Records:\n\n" + last, "info");
           });
      }
 
@@ -473,6 +516,12 @@
 
           // Save on change
           input.addEventListener("change", () => {
+               const val = Number(input.value);
+               if (val < 0) {
+                    alert('Please enter a non-negative value');
+                    input.value = exerciseData[key] !== undefined ? exerciseData[key] : input.defaultValue;
+                    return;
+               }
                exerciseData[key] = input.value;
                set("exerciseData", exerciseData);
           });
@@ -488,6 +537,11 @@
 
           if (!name || !type || !duration) return;
 
+          if (Number(duration) <= 0) {
+               alert('Please enter a valid duration');
+               return;
+          }
+
           const templates = get("workoutTemplates", []);
           templates.push({
                name,
@@ -498,7 +552,7 @@
 
           set("workoutTemplates", templates);
 
-          alert("Workout plan saved.\n(For assignment purpose)");
+          showToast("Workout plan saved.", "success");
      });
 
 })();
@@ -594,7 +648,7 @@
           weightEl.textContent = profile.weight;
           locationEl.textContent = profile.location;
 
-          alert("Profile updated successfully");
+          showToast("Profile updated successfully", "success");
      });
 
      function saveSettings() {
@@ -619,8 +673,10 @@
      /* ---------- Logout ---------- */
      logoutBtn.addEventListener("click", () => {
           localStorage.removeItem("currentUser");
-          alert("Logged out successfully");
-          window.location.href = "Login.html";
+          showToast("Logged out successfully", "success");
+          setTimeout(() => {
+               window.location.href = "Login.html";
+          }, 1500);
      });
 
 })();
@@ -652,14 +708,22 @@
      };
      const set = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
-     form.addEventListener("submit", () => {
+     async function hashPassword(password) {
+          const msgBuffer = new TextEncoder().encode(password);
+          const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+          return hashHex;
+     }
+
+     form.addEventListener("submit", async () => {
           const isSignup = signupTab.checked;
 
           const email = emailInput.value.trim();
           const password = passwordInput.value.trim();
 
           if (!email || !password) {
-               alert("Email and password are required");
+               showToast("Email and password are required", "error");
                return;
           }
 
@@ -669,20 +733,21 @@
                // SIGN UP
                const name = nameInput.value.trim();
                if (!name) {
-                    alert("Name is required for signup");
+                    showToast("Name is required for signup", "error");
                     return;
                }
 
                const exists = users.find(u => u.email === email);
                if (exists) {
-                    alert("User already exists. Please login.");
+                    showToast("User already exists. Please login.", "error");
                     return;
                }
 
+               const hashedPassword = await hashPassword(password);
                const newUser = {
                     name,
                     email,
-                    password, 
+                    password: hashedPassword,
                     createdAt: Date.now()
                };
 
@@ -699,31 +764,36 @@
                     location: "—"
                });
 
-               alert("Account created successfully");
-               window.location.href = "Dashboard.html";
+               showToast("Account created successfully", "success");
+               setTimeout(() => {
+                    window.location.href = "Dashboard.html";
+               }, 1500);
 
           } else {
+               const hashedPassword = await hashPassword(password);
                const user = users.find(
-                    u => u.email === email && u.password === password
+                    u => u.email === email && u.password === hashedPassword
                );
 
                if (!user) {
-                    alert("Invalid email or password");
+                    showToast("Invalid email or password", "error");
                     return;
                }
 
                set("currentUser", user);
-               alert("Login successful");
-               window.location.href = "Dashboard.html";
+               showToast("Login successful", "success");
+               setTimeout(() => {
+                    window.location.href = "Dashboard.html";
+               }, 1500);
           }
      });
 
      googleBtn.addEventListener("click", () => {
-          alert("Google login is mocked for this project");
+          showToast("Google login is mocked for this project", "info");
      });
 
      facebookBtn.addEventListener("click", () => {
-          alert("Facebook login is mocked for this project");
+          showToast("Facebook login is mocked for this project", "info");
      });
 
 })();
