@@ -13,604 +13,6 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="styles.css">
-     <style>
-        :root {
-            --color-bg-body: #0a110d;
-            --color-bg-sidebar: #0f1a14;
-            --color-bg-card: #14241b;
-            --color-bg-card-hover: #1a2e23;
-            --color-bg-input: #0a140f;
-            --color-primary: #13ec5b;
-            --color-primary-dark: #0ea841;
-            --color-primary-dim: rgba(19, 236, 91, 0.1);
-            --color-text-main: #fff;
-            --color-text-muted: #8c9e92;
-            --color-text-dark: #050b07;
-            --color-border: rgba(255, 255, 255, 0.08);
-            --color-border-hover: rgba(19, 236, 91, 0.4);
-            --color-blue: #3b82f6;
-            --color-blue-dim: rgba(59, 130, 246, 0.15);
-            --color-orange: #f97316;
-            --color-orange-dim: rgba(249, 115, 22, 0.15);
-            --color-purple: #a855f7;
-            --color-purple-dim: rgba(168, 85, 247, 0.15);
-            --color-green: #22c55e;
-            --color-green-dim: rgba(34, 197, 94, 0.15);
-            --sidebar-width: 260px;
-            --header-height: 80px;
-            --border-radius: 12px;
-            --border-radius-sm: 6px;
-            --gap-md: 24px;
-            --gap-sm: 16px;
-            --font-family: "Inter", sans-serif
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0
-        }
-
-        body {
-            font-family: var(--font-family);
-            background-color: var(--color-bg-body);
-            color: var(--color-text-main);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            font-weight: 700;
-            color: var(--color-text-main)
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit
-        }
-
-        button {
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-family: inherit
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--color-bg-body)
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #2a4032;
-            border-radius: 4px
-        }
-
-        .app-container {
-            display: flex;
-            width: 100%;
-            height: 100%
-        }
-
-        .sidebar {
-            width: var(--sidebar-width);
-            background-color: var(--color-bg-sidebar);
-            border-right: 1px solid var(--color-border);
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-            z-index: 10
-        }
-
-        .sidebar-header {
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px
-        }
-
-        .brand {
-            font-size: 24px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            letter-spacing: -0.5px
-        }
-
-        .brand-icon {
-            font-size: 32px;
-            color: var(--color-primary)
-        }
-
-        .brand-subtitle {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 600;
-            color: var(--color-primary);
-            opacity: 0.7;
-            padding-left: 42px
-        }
-
-        .nav-menu {
-            flex: 1;
-            padding: 20px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            overflow-y: auto
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: var(--border-radius-sm);
-            color: var(--color-text-muted);
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease
-        }
-
-        .nav-item:hover {
-            background-color: rgba(255, 255, 255, 0.03);
-            color: var(--color-text-main)
-        }
-
-        .nav-item.active {
-            background-color: var(--color-primary-dim);
-            color: var(--color-primary);
-            border: 1px solid rgba(19, 236, 91, 0.2)
-        }
-
-        .sidebar-footer {
-            padding: 20px;
-            border-top: 1px solid var(--color-border)
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background-color: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--border-radius-sm)
-        }
-
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--color-primary), var(--color-blue));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 12px;
-            color: var(--color-bg-sidebar)
-        }
-
-        .user-info h4 {
-            font-size: 14px;
-            line-height: 1.2
-        }
-
-        .user-info span {
-            font-size: 12px;
-            color: var(--color-text-muted)
-        }
-
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column
-        }
-
-        .mobile-header {
-            display: none;
-            padding: 16px;
-            background-color: var(--color-bg-sidebar);
-            border-bottom: 1px solid var(--color-border);
-            justify-content: space-between;
-            align-items: center
-        }
-
-        .content-wrapper {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px;
-            width: 100%
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-            gap: 20px
-        }
-
-        .welcome-text h2 {
-            font-size: 32px;
-            font-weight: 900;
-            letter-spacing: -0.5px;
-            margin-bottom: 8px
-        }
-
-        .welcome-text p {
-            color: var(--color-text-muted);
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px
-        }
-
-        .btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            border-radius: var(--border-radius-sm);
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s ease
-        }
-
-        .btn-outline {
-            background-color: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            color: var(--color-text-main)
-        }
-
-        .btn-outline:hover {
-            border-color: var(--color-primary)
-        }
-
-        .btn-primary {
-            background-color: var(--color-primary);
-            color: var(--color-text-dark);
-            border: 1px solid transparent;
-            font-weight: 700
-        }
-
-        .btn-primary:hover {
-            background-color: var(--color-primary-dark)
-        }
-
-        .calendar-container {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 12px;
-            margin-bottom: 40px;
-            width: 100%;
-        }
-
-        .calendar-day {
-            background-color: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--border-radius);
-            padding: 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-            min-height: 100px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .calendar-day:hover {
-            background-color: var(--color-bg-card-hover);
-            border-color: rgba(19, 236, 91, 0.2);
-        }
-
-        .calendar-day.active {
-            background-color: var(--color-primary-dim);
-            border-color: var(--color-primary);
-            color: var(--color-primary);
-        }
-
-        .calendar-day.active .day-name {
-            color: var(--color-primary);
-        }
-
-        .day-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--color-text-muted);
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-
-        .day-number {
-            font-size: 24px;
-            font-weight: 800;
-            margin-bottom: 8px;
-        }
-
-        .day-indicator {
-            font-size: 11px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--color-text-muted);
-        }
-
-        .calendar-day.active .day-indicator {
-            background: var(--color-primary);
-            color: var(--color-text-dark);
-            font-weight: 700;
-        }
-
-        .day-has-workout::after {
-            content: '';
-            position: absolute;
-            bottom: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background-color: var(--color-primary);
-        }
-
-        .workout-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 24px;
-        }
-
-        .workout-card {
-            background-color: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            transition: border-color 0.2s ease;
-        }
-
-        .workout-card:hover {
-            border-color: rgba(19, 236, 91, 0.3);
-        }
-
-        .workout-card-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--color-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .workout-title-group {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .workout-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--color-text-main);
-        }
-
-        .workout-subtitle {
-            font-size: 13px;
-            color: var(--color-text-muted);
-        }
-
-        .workout-badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-strength {
-            background: var(--color-orange-dim);
-            color: var(--color-orange);
-        }
-
-        .badge-cardio {
-            background: var(--color-blue-dim);
-            color: var(--color-blue);
-        }
-
-        .badge-flexibility {
-            background: var(--color-purple-dim);
-            color: var(--color-purple);
-        }
-
-        .workout-card-body {
-            padding: 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .exercise-row {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .exercise-row:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .exercise-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--color-text-main);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .exercise-inputs {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .input-label {
-            font-size: 11px;
-            color: var(--color-text-muted);
-            font-weight: 500;
-        }
-
-        .mini-input {
-            background-color: var(--color-bg-input);
-            border: 1px solid var(--color-border);
-            border-radius: 4px;
-            padding: 6px 10px;
-            color: var(--color-text-main);
-            font-family: inherit;
-            font-size: 13px;
-            width: 100%;
-            text-align: center;
-            transition: border-color 0.2s;
-            outline: none;
-        }
-
-        .mini-input:focus {
-            border-color: var(--color-primary);
-            background-color: rgba(255, 255, 255, 0.02);
-        }
-
-        .workout-card-footer {
-            padding: 16px 20px;
-            border-top: 1px solid var(--color-border);
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .btn-sm {
-            padding: 6px 14px;
-            font-size: 12px;
-        }
-
-        .section-title {
-            font-size: 20px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .today-marker {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 6px;
-            height: 6px;
-            background-color: var(--color-primary);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--color-primary);
-        }
-
-        @media (max-width: 992px) {
-            .calendar-container {
-                overflow-x: auto;
-                padding-bottom: 12px;
-            }
-
-            .calendar-day {
-                min-width: 100px;
-            }
-
-            .sidebar {
-                width: 80px;
-            }
-
-            .brand-subtitle,
-            .nav-item span:not(.material-symbols-outlined),
-            .user-info {
-                display: none
-            }
-
-            .brand {
-                justify-content: center
-            }
-
-            .brand-icon {
-                font-size: 36px
-            }
-
-            .nav-item {
-                justify-content: center
-            }
-
-            .user-profile {
-                justify-content: center;
-                padding: 12px 0
-            }
-        }
-
-        @media (max-width: 768px) {
-            .workout-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
-            }
-
-            .sidebar {
-                display: none;
-            }
-
-            .mobile-header {
-                display: flex;
-            }
-
-            .content-wrapper {
-                padding: 20px;
-            }
-
-            .calendar-day {
-                min-height: 80px;
-                padding: 12px;
-            }
-
-            .day-number {
-                font-size: 20px;
-            }
-        }
-    </style> 
 </head>
 
 <body>
@@ -739,15 +141,15 @@
                             <div class="exercise-inputs">
                                 <div class="input-group">
                                     <label class="input-label" for="ex1-sets">Sets</label>
-                                    <input class="mini-input" id="ex1-sets" type="number" value="4" />
+                                    <input class="mini-input" id="ex1-sets" type="number" min="0" value="4" />
                                 </div>
                                 <div class="input-group">
                                     <label class="input-label" for="ex1-reps">Reps</label>
-                                    <input class="mini-input" id="ex1-reps" type="number" value="8" />
+                                    <input class="mini-input" id="ex1-reps" type="number" min="0" value="8" />
                                 </div>
                                 <div class="input-group">
                                     <label class="input-label" for="ex1-weight">Kg</label>
-                                    <input class="mini-input" id="ex1-weight" type="number" value="100" />
+                                    <input class="mini-input" id="ex1-weight" type="number" min="0" value="100" />
                                 </div>
                             </div>
                         </div>
@@ -760,15 +162,15 @@
                             <div class="exercise-inputs">
                                 <div class="input-group">
                                     <label class="input-label" for="ex2-sets">Sets</label>
-                                    <input class="mini-input" id="ex2-sets" type="number" value="3" />
+                                    <input class="mini-input" id="ex2-sets" type="number" min="0" value="3" />
                                 </div>
                                 <div class="input-group">
                                     <label class="input-label" for="ex2-reps">Reps</label>
-                                    <input class="mini-input" id="ex2-reps" type="number" value="12" />
+                                    <input class="mini-input" id="ex2-reps" type="number" min="0" value="12" />
                                 </div>
                                 <div class="input-group">
                                     <label class="input-label" for="ex2-weight">Kg</label>
-                                    <input class="mini-input" id="ex2-weight" type="number" value="200" />
+                                    <input class="mini-input" id="ex2-weight" type="number" min="0" value="200" />
                                 </div>
                             </div>
                         </div>
@@ -781,15 +183,15 @@
                             <div class="exercise-inputs">
                                 <div class="input-group">
                                     <label class="input-label" for="ex3-sets">Sets</label>
-                                    <input class="mini-input" id="ex3-sets" type="number" value="3" />
+                                    <input class="mini-input" id="ex3-sets" type="number" min="0" value="3" />
                                 </div>
                                 <div class="input-group">
                                     <label class="input-label" for="ex3-reps">Reps</label>
-                                    <input class="mini-input" id="ex3-reps" type="number" value="10" />
+                                    <input class="mini-input" id="ex3-reps" type="number" min="0" value="10" />
                                 </div>
                                 <div class="input-group">
                                     <label class="input-label" for="ex3-weight">Kg</label>
-                                    <input class="mini-input" id="ex3-weight" type="number" value="80" />
+                                    <input class="mini-input" id="ex3-weight" type="number" min="0" value="80" />
                                 </div>
                             </div>
                         </div>
@@ -818,15 +220,15 @@
                             <div class="exercise-inputs">
                                 <div class="input-group">
                                     <label class="input-label" for="ex4-sets">Sets</label>
-                                    <input class="mini-input" id="ex4-sets" type="number" value="3" />
+                                    <input class="mini-input" id="ex4-sets" type="number" min="0" value="3" />
                                 </div>
                                 <div class="input-group">
                                     <label class="input-label" for="ex4-reps">Reps</label>
-                                    <input class="mini-input" id="ex4-reps" type="number" value="15" />
+                                    <input class="mini-input" id="ex4-reps" type="number" min="0" value="15" />
                                 </div>
                                 <div class="input-group">
                                     <label class="input-label" for="ex4-weight">Kg</label>
-                                    <input class="mini-input" id="ex4-weight" type="number" value="60" />
+                                    <input class="mini-input" id="ex4-weight" type="number" min="0" value="60" />
                                 </div>
                             </div>
                         </div>
@@ -839,15 +241,15 @@
                             <div class="exercise-inputs">
                                 <div class="input-group">
                                     <label class="input-label" for="ex5-sets">Sets</label>
-                                    <input class="mini-input" id="ex5-sets" type="number" value="4" />
+                                    <input class="mini-input" id="ex5-sets" type="number" min="0" value="4" />
                                 </div>
                                 <div class="input-group">
                                     <label class="input-label" for="ex5-reps">Reps</label>
-                                    <input class="mini-input" id="ex5-reps" type="number" value="20" />
+                                    <input class="mini-input" id="ex5-reps" type="number" min="0" value="20" />
                                 </div>
                                 <div class="input-group">
                                     <label class="input-label" for="ex5-weight">Kg</label>
-                                    <input class="mini-input" id="ex5-weight" type="number" value="BW" />
+                                    <input class="mini-input" id="ex5-weight" type="number" min="0" value="BW" />
                                 </div>
                             </div>
                         </div>
@@ -876,15 +278,15 @@
                             <div class="exercise-inputs">
                                 <div class="input-group">
                                     <label class="input-label" for="ex6-mins">Mins</label>
-                                    <input class="mini-input" id="ex6-mins" type="number" value="15" />
+                                    <input class="mini-input" id="ex6-mins" type="number" min="0" value="15" />
                                 </div>
                                 <div class="input-group">
                                     <label class="input-label" for="ex6-incline">Incline</label>
-                                    <input class="mini-input" id="ex6-incline" type="number" value="12" />
+                                    <input class="mini-input" id="ex6-incline" type="number" min="0" value="12" />
                                 </div>
                                 <div class="input-group">
                                     <label class="input-label" for="ex6-speed">Speed</label>
-                                    <input class="mini-input" id="ex6-speed" type="number" value="4" />
+                                    <input class="mini-input" id="ex6-speed" type="number" min="0" value="4" />
                                 </div>
                             </div>
                         </div>
