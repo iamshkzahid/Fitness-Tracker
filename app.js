@@ -1,5 +1,72 @@
+/* ================================
+   GLOBAL HELPERS
+   ================================ */
 
-(function () {
+function showToast(message, type = "normal") {
+     let container = document.querySelector(".toast-container");
+     if (!container) {
+          container = document.createElement("div");
+          container.className = "toast-container";
+          document.body.appendChild(container);
+     }
+
+     const toast = document.createElement("div");
+     toast.className = "toast";
+
+     if (type === "success") toast.classList.add("toast-success");
+     if (type === "error") toast.classList.add("toast-error");
+
+     // Icon based on type
+     let icon = "info";
+     if (type === "success") icon = "check_circle";
+     if (type === "error") icon = "error";
+
+     const iconSpan = document.createElement('span');
+     iconSpan.className = 'material-symbols-outlined';
+     iconSpan.style.fontSize = '20px';
+     iconSpan.textContent = icon;
+
+     const msgSpan = document.createElement('span');
+     msgSpan.textContent = message;
+
+     toast.appendChild(iconSpan);
+     toast.appendChild(msgSpan);
+
+     container.appendChild(toast);
+
+     // Auto remove
+     setTimeout(() => {
+          toast.classList.add("fade-out");
+          toast.addEventListener("animationend", () => {
+               toast.remove();
+               if (container.children.length === 0) {
+                    container.remove();
+               }
+          });
+     }, 3000);
+}
+
+
+/* ================================
+   GLOBAL SESSION CHECK
+   ================================ */
+(async function() {
+    // If we are on the login page, do nothing
+    if (document.getElementById("auth-form")) return;
+
+    const raw = localStorage.getItem("currentUser");
+    if (raw) {
+        // Try to decrypt the current user
+        // If raw exists (encrypted) but get returns null, it means we don't have the key (Session Expired)
+        const user = await window.AsyncStorage.get("currentUser");
+        if (!user) {
+            console.warn("Session expired (Key missing). Redirecting to login.");
+            window.location.href = "index.html";
+        }
+    }
+})();
+
+(async function () {
      // helper
      function $(sel, root = document) { return root.querySelector(sel); }
      function $$(sel, root = document) { return Array.from((root || document).querySelectorAll(sel)); }
@@ -8,7 +75,7 @@
 
      // ===== Dynamic Welcome Username =====
      const usernameSpan = document.getElementById("dashboard-username");
-     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+     const currentUser = await window.AsyncStorage.get("currentUser");
 
      if (usernameSpan && currentUser && currentUser.name) {
           usernameSpan.textContent = currentUser.name;
@@ -26,7 +93,6 @@
 
      const activityTable = document.querySelector('.activity-table');
      const activityTbody = activityTable ? activityTable.querySelector('tbody') : null;
-
      
      const statValues = $$('.stat-card .stat-value');
 
@@ -38,21 +104,21 @@
      const bmiCategoryEl = $('#bmiCategory');
 
      // ===== Functions =====
-     function renderRecentActivity() {
+     async function renderRecentActivity() {
           if (!activityTbody) return;
           // clear all rows
           activityTbody.innerHTML = '';
-          const workouts = storage.get('workouts', []);
+          const workouts = await window.AsyncStorage.get('workouts', []);
+
           if (!workouts || workouts.length === 0) {
-              
                const tr = document.createElement('tr');
                tr.innerHTML = `<td colspan="5" style="opacity:.7; padding:20px 24px;">No workouts logged yet. Use the 'Add Workout' form above.</td>`;
                activityTbody.appendChild(tr);
                return;
           }
 
-          const recent = workouts.slice().reverse();
-          recent.forEach(w => {
+          for (let i = workouts.length - 1; i >= 0; i--) {
+               const w = workouts[i];
                const tr = document.createElement('tr');
                const dateStr = w.ts ? new Date(w.ts).toLocaleString() : 'Unknown';
                const duration = w.duration ? `${w.duration} min` : '-';
@@ -70,19 +136,19 @@
         <td class="text-right"><span class="status-badge">COMPLETED</span></td>
       `;
                activityTbody.appendChild(tr);
-          });
+          }
      }
 
-     function updateStatCards() {
-          const workouts = storage.get('workouts', []);
+     async function updateStatCards() {
+          const workouts = await window.AsyncStorage.get('workouts', []);
           // calories total
           const totalCalories = workouts.reduce((s, w) => s + (Number(w.calories) || 0), 0);
           // active minutes total
           const totalMinutes = workouts.reduce((s, w) => s + (Number(w.duration) || 0), 0);
           // average heart rate – we don't have HR stored; keep UI unchanged if no data
-          const avgHR = storage.get('avgHR', null); 
+          const avgHR = await window.AsyncStorage.get('avgHR', null);
         
-          const water = storage.get('waterToday', null);
+          const water = await window.AsyncStorage.get('waterToday', null);
 
           if (statValues && statValues.length >= 4) {
                statValues[0].textContent = `${totalCalories.toLocaleString()} `;
@@ -98,60 +164,55 @@
           }
      }
 
-     function escapeHtml(unsafe) {
-          if (unsafe === null || unsafe === undefined) return '';
-          return String(unsafe)
-               .replace(/&/g, '&amp;')
-               .replace(/</g, '&lt;')
-               .replace(/>/g, '&gt;')
-               .replace(/"/g, '&quot;')
-               .replace(/'/g, '&#039;');
-     }
-
      // ===== Add workout event =====
      if (addBtn) {
-          addBtn.addEventListener('click', () => {
+          addBtn.addEventListener('click', async () => {
                const name = nameIn ? nameIn.value.trim() : '';
                const duration = durIn ? Number(durIn.value) : 0;
                const calories = calIn ? Number(calIn.value) : 0;
 
                if (!name) {
-                    alert('Enter workout name');
+                    showToast('Enter workout name', 'error');
+                    return;
+               }
+
+               if (duration <= 0 || calories <= 0) {
+                    alert('Please enter valid positive numbers for duration and calories');
                     return;
                }
 
                const obj = { name, duration, calories, ts: Date.now() };
-               storage.push('workouts', obj);
+               await window.AsyncStorage.push('workouts', obj);
 
                if (nameIn) nameIn.value = '';
                if (durIn) durIn.value = '';
                if (calIn) calIn.value = '';
 
-               renderRecentActivity();
-               updateStatCards();
+               await renderRecentActivity();
+               await updateStatCards();
 
-               alert('Workout added successfully');
+               showToast('Workout added successfully', 'success');
           });
      }
 
      // ===== BMI Calculator event =====
      if (calcBmiBtn && heightEl && weightEl && bmiResultEl && bmiCategoryEl) {
-          calcBmiBtn.addEventListener('click', () => {
+          calcBmiBtn.addEventListener('click', async () => {
                const h = Number(heightEl.value);
                const w = Number(weightEl.value);
-               if (!h || !w) { alert('Enter valid height and weight'); return; }
+               if (!h || !w) { showToast('Enter valid height and weight', 'error'); return; }
                const bmi = +(w / ((h / 100) * (h / 100))).toFixed(1);
                const cat = bmi < 18.5 ? 'Underweight' : (bmi < 25 ? 'Normal' : (bmi < 30 ? 'Overweight' : 'Obese'));
                bmiResultEl.textContent = bmi;
                bmiCategoryEl.textContent = cat;
-               storage.push('bmiHistory', { bmi, height: h, weight: w, ts: Date.now() });
+               await window.AsyncStorage.push('bmiHistory', { bmi, height: h, weight: w, ts: Date.now() });
                alert('BMI calculated and saved');
                // update dashboard widgets, if desired
-               updateStatCards();
+               await updateStatCards();
           });
      }
 
-     // ===== Navigation safety (sidebar links already have ids in your file) =====
+     // ===== Navigation safety =====
      ['#nav-home', '#nav-planner', '#nav-bmi', '#nav-progress', '#nav-profile', '#brand-logo'].forEach(sel => {
           const el = document.querySelector(sel);
           if (!el) return;
@@ -170,8 +231,8 @@
           });
      });
 
-     renderRecentActivity();
-     updateStatCards();
+     await renderRecentActivity();
+     await updateStatCards();
 
 })();
 
@@ -179,19 +240,11 @@
    PROGRESS PAGE LOGIC
    ================================ */
 
-(function () {
+(async function () {
      if (!document.getElementById("monthly-chart-container")) return;
 
-     const get = (k, f = []) => {
-          try {
-               return JSON.parse(localStorage.getItem(k)) || f;
-          } catch {
-               return f;
-          }
-     };
-
-     const workouts = get("workouts"); 
-     const bmiHistory = get("bmiHistory");
+     const workouts = await window.AsyncStorage.get("workouts", []);
+     const bmiHistory = await window.AsyncStorage.get("bmiHistory", []);
 
      const chartContainer = document.getElementById("monthly-chart-container");
 
@@ -308,7 +361,7 @@
    BMI PAGE LOGIC
    ================================ */
 
-(function () {
+(async function () {
      // Run only on BMI page
      if (!document.getElementById("bmi-calc-trigger")) return;
 
@@ -324,18 +377,8 @@
 
      const historyBtn = document.getElementById("bmi-history-btn");
 
-     const get = (k, f = []) => {
-          try {
-               return JSON.parse(localStorage.getItem(k)) || f;
-          } catch {
-               return f;
-          }
-     };
-
-     const saveBMI = (entry) => {
-          const history = get("bmiHistory");
-          history.push(entry);
-          localStorage.setItem("bmiHistory", JSON.stringify(history));
+     const saveBMI = async (entry) => {
+          await window.AsyncStorage.push("bmiHistory", entry);
      };
 
      function getCategory(bmi) {
@@ -346,12 +389,12 @@
      }
 
      // Calculate BMI
-     calcBtn.addEventListener("click", () => {
+     calcBtn.addEventListener("click", async () => {
           const height = Number(heightInput.value);
           const weight = Number(weightInput.value);
 
           if (!height || !weight) {
-               alert("Please enter valid height and weight");
+               showToast("Please enter valid height and weight", "error");
                return;
           }
 
@@ -369,7 +412,7 @@
           markerLabel.textContent = bmi;
 
           // Save history
-          saveBMI({
+          await saveBMI({
                bmi,
                height,
                weight,
@@ -379,10 +422,10 @@
      });
 
      if (historyBtn) {
-          historyBtn.addEventListener("click", () => {
-               const history = get("bmiHistory");
+          historyBtn.addEventListener("click", async () => {
+               const history = await window.AsyncStorage.get("bmiHistory", []);
                if (!history.length) {
-                    alert("No BMI history yet");
+                    showToast("No BMI history yet", "info");
                     return;
                }
 
@@ -390,7 +433,7 @@
                     .map(h => `${h.bmi} (${h.category})`)
                     .join("\n");
 
-               alert("Last BMI Records:\n\n" + last);
+               showToast("Last BMI Records:\n\n" + last, "info");
           });
      }
 
@@ -400,19 +443,13 @@
    WORKOUT PLANNER PAGE LOGIC
    ================================ */
 
-(function () {
+(async function () {
 
      if (!document.getElementById("btn-plan-new")) return;
 
-     const get = (k, f = {}) => {
-          try { return JSON.parse(localStorage.getItem(k)) || f; }
-          catch { return f; }
-     };
-     const set = (k, v) => localStorage.setItem(k, JSON.stringify(v));
-
      /* ---------- Calendar Day Logic ---------- */
      const days = document.querySelectorAll(".calendar-day");
-     const plannerData = get("plannerData", {});
+     const plannerData = await window.AsyncStorage.get("plannerData", {});
 
      days.forEach(day => {
           const dayId = day.id;
@@ -423,7 +460,7 @@
                if (indicator) indicator.textContent = plannerData[dayId].title;
           }
 
-          day.addEventListener("click", () => {
+          day.addEventListener("click", async () => {
 
                days.forEach(d => d.classList.remove("active"));
                day.classList.add("active");
@@ -438,7 +475,7 @@
                     ts: Date.now()
                };
 
-               set("plannerData", plannerData);
+               await window.AsyncStorage.set("plannerData", plannerData);
 
                day.classList.add("day-has-workout");
                const indicator = day.querySelector(".day-indicator");
@@ -447,7 +484,7 @@
      });
 
      const exerciseInputs = document.querySelectorAll(".mini-input");
-     const exerciseData = get("exerciseData", {});
+     const exerciseData = await window.AsyncStorage.get("exerciseData", {});
 
      exerciseInputs.forEach(input => {
           const key = input.id;
@@ -457,23 +494,23 @@
           }
 
           // Save on change
-          input.addEventListener("change", () => {
+          input.addEventListener("change", async () => {
                exerciseData[key] = input.value;
-               set("exerciseData", exerciseData);
+               await window.AsyncStorage.set("exerciseData", exerciseData);
           });
      });
 
      /* ---------- Plan New Workout Button ---------- */
      const planBtn = document.getElementById("btn-plan-new");
 
-     planBtn.addEventListener("click", () => {
+     planBtn.addEventListener("click", async () => {
           const name = prompt("Workout title (e.g. Push Day):");
           const type = prompt("Workout type (Strength/Cardio/Flexibility):");
           const duration = prompt("Estimated duration (mins):");
 
           if (!name || !type || !duration) return;
 
-          const templates = get("workoutTemplates", []);
+          const templates = await window.AsyncStorage.get("workoutTemplates", []);
           templates.push({
                name,
                type,
@@ -481,9 +518,9 @@
                ts: Date.now()
           });
 
-          set("workoutTemplates", templates);
+          await window.AsyncStorage.set("workoutTemplates", templates);
 
-          alert("Workout plan saved.\n(For assignment purpose)");
+          showToast("Workout plan saved.", "success");
      });
 
 })();
@@ -492,15 +529,9 @@
    PROFILE PAGE LOGIC
    ================================ */
 
-(function () {
+(async function () {
 
      if (!document.getElementById("btn-edit-profile")) return;
-
-     const get = (k, f = {}) => {
-          try { return JSON.parse(localStorage.getItem(k)) || f; }
-          catch { return f; }
-     };
-     const set = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
      const nameEl = document.getElementById("profile-name-display");
 
@@ -518,7 +549,7 @@
      const unitsSelect = document.getElementById("units-system-select");
      const darkModeToggle = document.getElementById("dark-mode-toggle");
 
-     const profile = get("profileData", {
+     const profile = await window.AsyncStorage.get("profileData", {
           name: "Alex Log.",
           email: "alex.log@example.com",
           age: "28 years",
@@ -534,7 +565,7 @@
      weightEl.textContent = profile.weight;
      locationEl.textContent = profile.location;
 
-     const settings = get("profileSettings", {
+     const settings = await window.AsyncStorage.get("profileSettings", {
           notifications: true,
           publicProfile: false,
           units: "Metric (kg, cm)",
@@ -553,7 +584,7 @@
      }
 
 
-     editBtn.addEventListener("click", () => {
+     editBtn.addEventListener("click", async () => {
           const name = prompt("Full Name:", profile.name);
           if (!name) return;
 
@@ -570,7 +601,8 @@
           profile.weight = weight || profile.weight;
           profile.location = location || profile.location;
 
-          set("profileData", profile);
+          // Note: This will be auto-encrypted if session key is present!
+          await window.AsyncStorage.set("profileData", profile);
 
           nameEl.textContent = profile.name;
           emailEl.textContent = profile.email;
@@ -579,13 +611,13 @@
           weightEl.textContent = profile.weight;
           locationEl.textContent = profile.location;
 
-          alert("Profile updated successfully");
+          showToast("Profile updated successfully", "success");
      });
 
-     function saveSettings() {
+     async function saveSettings() {
           const isDark = darkModeToggle.checked;
 
-          set("profileSettings", {
+          await window.AsyncStorage.set("profileSettings", {
                notifications: notifToggle.checked,
                publicProfile: publicToggle.checked,
                units: unitsSelect.value,
@@ -602,10 +634,11 @@
      darkModeToggle.addEventListener("change", saveSettings);
 
      /* ---------- Logout ---------- */
-     logoutBtn.addEventListener("click", () => {
-          localStorage.removeItem("currentUser");
+     logoutBtn.addEventListener("click", async () => {
+          await window.AsyncStorage.remove("currentUser");
+          window.Security.clearSession(); // Clear session key from memory/sessionStorage
           alert("Logged out successfully");
-          window.location.href = "Login.html";
+          window.location.href = "index.html";
      });
 
 })();
@@ -614,7 +647,7 @@
    LOGIN / SIGNUP PAGE LOGIC
    ================================ */
 
-(function () {
+(async function () {
 
      if (!document.getElementById("auth-form")) return;
 
@@ -631,51 +664,65 @@
      const googleBtn = document.getElementById("google-login-btn");
      const facebookBtn = document.getElementById("facebook-login-btn");
 
-     const get = (k, f = []) => {
-          try { return JSON.parse(localStorage.getItem(k)) || f; }
-          catch { return f; }
-     };
-     const set = (k, v) => localStorage.setItem(k, JSON.stringify(v));
-
-     form.addEventListener("submit", () => {
+     form.addEventListener("submit", async () => {
           const isSignup = signupTab.checked;
 
           const email = emailInput.value.trim();
           const password = passwordInput.value.trim();
 
           if (!email || !password) {
-               alert("Email and password are required");
+               showToast("Email and password are required", "error");
                return;
           }
 
-          let users = get("users", []);
+          let users = await window.AsyncStorage.get("users", []);
 
           if (isSignup) {
                // SIGN UP
                const name = nameInput.value.trim();
                if (!name) {
-                    alert("Name is required for signup");
+                    showToast("Name is required for signup", "error");
                     return;
                }
 
                const exists = users.find(u => u.email === email);
                if (exists) {
-                    alert("User already exists. Please login.");
+                    showToast("User already exists. Please login.", "error");
                     return;
                }
+
+               // --- SECURITY IMPLEMENTATION ---
+               const salt = window.Security.generateSalt();
+               const passwordHash = await window.Security.hashPassword(password, salt);
+
+               // Derive session key for encryption
+               const sessionKey = await window.Security.deriveKey(password, salt);
+               await window.Security.setSessionKey(sessionKey);
 
                const newUser = {
                     name,
                     email,
-                    password, 
+                    salt,
+                    passwordHash, // Store hash, not password!
                     createdAt: Date.now()
                };
 
                users.push(newUser);
-               set("users", users);
-               set("currentUser", newUser);
 
-               set("profileData", {
+               // Save users list (users list itself is plain text so we can find email, but passwords are hashed)
+               // Note: We are NOT encrypting 'users' key in AsyncStorage.js for this reason.
+               await window.AsyncStorage.set("users", users);
+
+               // Store current user (without password)
+               // Encrypted because 'currentUser' is in encryptedKeys list
+               await window.AsyncStorage.set("currentUser", {
+                    name: newUser.name,
+                    email: newUser.email,
+                    createdAt: newUser.createdAt
+               });
+
+               // Initialize profile data (Encrypted!)
+               await window.AsyncStorage.set("profileData", {
                     name: newUser.name,
                     email: newUser.email,
                     age: "—",
@@ -684,32 +731,77 @@
                     location: "—"
                });
 
-               alert("Account created successfully");
-               window.location.href = "Dashboard.html";
+               showToast("Account created successfully", "success");
+               setTimeout(() => {
+                    window.location.href = "Dashboard.html";
+               }, 1500);
 
           } else {
-               const user = users.find(
-                    u => u.email === email && u.password === password
-               );
+               // LOGIN
+               let user = users.find(u => u.email === email);
 
                if (!user) {
+                   alert("Invalid email or password");
+                   return;
+               }
+
+               let valid = false;
+
+               // Check if user has salt (Secure User)
+               if (user.salt && user.passwordHash) {
+                   const hash = await window.Security.hashPassword(password, user.salt);
+                   if (hash === user.passwordHash) {
+                       valid = true;
+                       // Set Session Key
+                       const sessionKey = await window.Security.deriveKey(password, user.salt);
+                       await window.Security.setSessionKey(sessionKey);
+                   }
+               } else if (user.password) {
+                   // Legacy User (Plain Text Password) - Upgrade them!
+                   if (user.password === password) {
+                       valid = true;
+
+                       // Migrate to secure storage
+                       const salt = window.Security.generateSalt();
+                       const passwordHash = await window.Security.hashPassword(password, salt);
+                       const sessionKey = await window.Security.deriveKey(password, salt);
+                       await window.Security.setSessionKey(sessionKey);
+
+                       // Update user record
+                       user.salt = salt;
+                       user.passwordHash = passwordHash;
+                       delete user.password; // Remove plain text password
+
+                       // Save updated users list
+                       await window.AsyncStorage.set("users", users);
+
+                       console.log("User migrated to secure storage.");
+                   }
+               }
+
+               if (!valid) {
                     alert("Invalid email or password");
                     return;
                }
 
-               set("currentUser", user);
+               // Save current user
+               await window.AsyncStorage.set("currentUser", {
+                    name: user.name,
+                    email: user.email,
+                    createdAt: user.createdAt
+               });
+
                alert("Login successful");
                window.location.href = "Dashboard.html";
           }
      });
 
      googleBtn.addEventListener("click", () => {
-          alert("Google login is mocked for this project");
+          showToast("Google login is mocked for this project", "info");
      });
 
      facebookBtn.addEventListener("click", () => {
-          alert("Facebook login is mocked for this project");
+          showToast("Facebook login is mocked for this project", "info");
      });
 
 })();
-
