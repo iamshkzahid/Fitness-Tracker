@@ -1,3 +1,51 @@
+/* ================================
+   GLOBAL HELPERS
+   ================================ */
+
+function showToast(message, type = "normal") {
+     let container = document.querySelector(".toast-container");
+     if (!container) {
+          container = document.createElement("div");
+          container.className = "toast-container";
+          document.body.appendChild(container);
+     }
+
+     const toast = document.createElement("div");
+     toast.className = "toast";
+
+     if (type === "success") toast.classList.add("toast-success");
+     if (type === "error") toast.classList.add("toast-error");
+
+     // Icon based on type
+     let icon = "info";
+     if (type === "success") icon = "check_circle";
+     if (type === "error") icon = "error";
+
+     const iconSpan = document.createElement('span');
+     iconSpan.className = 'material-symbols-outlined';
+     iconSpan.style.fontSize = '20px';
+     iconSpan.textContent = icon;
+
+     const msgSpan = document.createElement('span');
+     msgSpan.textContent = message;
+
+     toast.appendChild(iconSpan);
+     toast.appendChild(msgSpan);
+
+     container.appendChild(toast);
+
+     // Auto remove
+     setTimeout(() => {
+          toast.classList.add("fade-out");
+          toast.addEventListener("animationend", () => {
+               toast.remove();
+               if (container.children.length === 0) {
+                    container.remove();
+               }
+          });
+     }, 3000);
+}
+
 
 const STORAGE_KEYS = {
      CURRENT_USER: 'currentUser',
@@ -17,7 +65,6 @@ const STORAGE_KEYS = {
      // helper
      function $(sel, root = document) { return root.querySelector(sel); }
      function $$(sel, root = document) { return Array.from((root || document).querySelectorAll(sel)); }
-     function safeParse(s, fallback) { try { return JSON.parse(s); } catch (e) { return fallback; } }
 
      if (!($('#addWorkoutBtn') || $('.activity-table'))) return;
 
@@ -31,21 +78,7 @@ const STORAGE_KEYS = {
 
 
      // ===== storage helpers =====
-     const storage = {
-          get(key, fallback) {
-               const raw = localStorage.getItem(key);
-               if (!raw) return fallback;
-               return safeParse(raw, fallback);
-          },
-          set(key, val) {
-               localStorage.setItem(key, JSON.stringify(val));
-          },
-          push(key, item) {
-               const arr = storage.get(key, []);
-               arr.push(item);
-               storage.set(key, arr);
-          }
-     };
+     // storage is now loaded from utils.js
 
      // ===== Elements =====
      const nameIn = $('#workoutName');
@@ -55,7 +88,6 @@ const STORAGE_KEYS = {
 
      const activityTable = document.querySelector('.activity-table');
      const activityTbody = activityTable ? activityTable.querySelector('tbody') : null;
-
      
      const statValues = $$('.stat-card .stat-value');
 
@@ -67,21 +99,20 @@ const STORAGE_KEYS = {
      const bmiCategoryEl = $('#bmiCategory');
 
      // ===== Functions =====
-     function renderRecentActivity() {
+     async function renderRecentActivity() {
           if (!activityTbody) return;
           // clear all rows
           activityTbody.innerHTML = '';
           const workouts = storage.get(STORAGE_KEYS.WORKOUTS, []);
           if (!workouts || workouts.length === 0) {
-              
                const tr = document.createElement('tr');
                tr.innerHTML = `<td colspan="5" style="opacity:.7; padding:20px 24px;">No workouts logged yet. Use the 'Add Workout' form above.</td>`;
                activityTbody.appendChild(tr);
                return;
           }
 
-          const recent = workouts.slice().reverse();
-          recent.forEach(w => {
+          for (let i = workouts.length - 1; i >= 0; i--) {
+               const w = workouts[i];
                const tr = document.createElement('tr');
                const dateStr = w.ts ? new Date(w.ts).toLocaleString() : 'Unknown';
                const duration = w.duration ? `${w.duration} min` : '-';
@@ -99,7 +130,7 @@ const STORAGE_KEYS = {
         <td class="text-right"><span class="status-badge">COMPLETED</span></td>
       `;
                activityTbody.appendChild(tr);
-          });
+          }
      }
 
      function updateStatCards() {
@@ -127,25 +158,20 @@ const STORAGE_KEYS = {
           }
      }
 
-     function escapeHtml(unsafe) {
-          if (unsafe === null || unsafe === undefined) return '';
-          return String(unsafe)
-               .replace(/&/g, '&amp;')
-               .replace(/</g, '&lt;')
-               .replace(/>/g, '&gt;')
-               .replace(/"/g, '&quot;')
-               .replace(/'/g, '&#039;');
-     }
-
      // ===== Add workout event =====
      if (addBtn) {
-          addBtn.addEventListener('click', () => {
+          addBtn.addEventListener('click', async () => {
                const name = nameIn ? nameIn.value.trim() : '';
                const duration = durIn ? Number(durIn.value) : 0;
                const calories = calIn ? Number(calIn.value) : 0;
 
                if (!name) {
-                    alert('Enter workout name');
+                    showToast('Enter workout name', 'error');
+                    return;
+               }
+
+               if (duration <= 0 || calories <= 0) {
+                    alert('Please enter valid positive numbers for duration and calories');
                     return;
                }
 
@@ -156,19 +182,19 @@ const STORAGE_KEYS = {
                if (durIn) durIn.value = '';
                if (calIn) calIn.value = '';
 
-               renderRecentActivity();
-               updateStatCards();
+               await renderRecentActivity();
+               await updateStatCards();
 
-               alert('Workout added successfully');
+               showToast('Workout added successfully', 'success');
           });
      }
 
      // ===== BMI Calculator event =====
      if (calcBmiBtn && heightEl && weightEl && bmiResultEl && bmiCategoryEl) {
-          calcBmiBtn.addEventListener('click', () => {
+          calcBmiBtn.addEventListener('click', async () => {
                const h = Number(heightEl.value);
                const w = Number(weightEl.value);
-               if (!h || !w) { alert('Enter valid height and weight'); return; }
+               if (!h || !w) { showToast('Enter valid height and weight', 'error'); return; }
                const bmi = +(w / ((h / 100) * (h / 100))).toFixed(1);
                const cat = bmi < 18.5 ? 'Underweight' : (bmi < 25 ? 'Normal' : (bmi < 30 ? 'Overweight' : 'Obese'));
                bmiResultEl.textContent = bmi;
@@ -176,11 +202,11 @@ const STORAGE_KEYS = {
                storage.push(STORAGE_KEYS.BMI_HISTORY, { bmi, height: h, weight: w, ts: Date.now() });
                alert('BMI calculated and saved');
                // update dashboard widgets, if desired
-               updateStatCards();
+               await updateStatCards();
           });
      }
 
-     // ===== Navigation safety (sidebar links already have ids in your file) =====
+     // ===== Navigation safety =====
      ['#nav-home', '#nav-planner', '#nav-bmi', '#nav-progress', '#nav-profile', '#brand-logo'].forEach(sel => {
           const el = document.querySelector(sel);
           if (!el) return;
@@ -199,8 +225,8 @@ const STORAGE_KEYS = {
           });
      });
 
-     renderRecentActivity();
-     updateStatCards();
+     await renderRecentActivity();
+     await updateStatCards();
 
 })();
 
@@ -208,7 +234,7 @@ const STORAGE_KEYS = {
    PROGRESS PAGE LOGIC
    ================================ */
 
-(function () {
+(async function () {
      if (!document.getElementById("monthly-chart-container")) return;
 
      const get = (k, f = []) => {
@@ -337,7 +363,7 @@ const STORAGE_KEYS = {
    BMI PAGE LOGIC
    ================================ */
 
-(function () {
+(async function () {
      // Run only on BMI page
      if (!document.getElementById("bmi-calc-trigger")) return;
 
@@ -375,12 +401,12 @@ const STORAGE_KEYS = {
      }
 
      // Calculate BMI
-     calcBtn.addEventListener("click", () => {
+     calcBtn.addEventListener("click", async () => {
           const height = Number(heightInput.value);
           const weight = Number(weightInput.value);
 
           if (!height || !weight) {
-               alert("Please enter valid height and weight");
+               showToast("Please enter valid height and weight", "error");
                return;
           }
 
@@ -398,7 +424,7 @@ const STORAGE_KEYS = {
           markerLabel.textContent = bmi;
 
           // Save history
-          saveBMI({
+          await saveBMI({
                bmi,
                height,
                weight,
@@ -411,7 +437,7 @@ const STORAGE_KEYS = {
           historyBtn.addEventListener("click", () => {
                const history = get(STORAGE_KEYS.BMI_HISTORY);
                if (!history.length) {
-                    alert("No BMI history yet");
+                    showToast("No BMI history yet", "info");
                     return;
                }
 
@@ -419,7 +445,7 @@ const STORAGE_KEYS = {
                     .map(h => `${h.bmi} (${h.category})`)
                     .join("\n");
 
-               alert("Last BMI Records:\n\n" + last);
+               showToast("Last BMI Records:\n\n" + last, "info");
           });
      }
 
@@ -429,15 +455,9 @@ const STORAGE_KEYS = {
    WORKOUT PLANNER PAGE LOGIC
    ================================ */
 
-(function () {
+(async function () {
 
      if (!document.getElementById("btn-plan-new")) return;
-
-     const get = (k, f = {}) => {
-          try { return JSON.parse(localStorage.getItem(k)) || f; }
-          catch { return f; }
-     };
-     const set = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
      /* ---------- Calendar Day Logic ---------- */
      const days = document.querySelectorAll(".calendar-day");
@@ -452,7 +472,7 @@ const STORAGE_KEYS = {
                if (indicator) indicator.textContent = plannerData[dayId].title;
           }
 
-          day.addEventListener("click", () => {
+          day.addEventListener("click", async () => {
 
                days.forEach(d => d.classList.remove("active"));
                day.classList.add("active");
@@ -486,7 +506,7 @@ const STORAGE_KEYS = {
           }
 
           // Save on change
-          input.addEventListener("change", () => {
+          input.addEventListener("change", async () => {
                exerciseData[key] = input.value;
                set(STORAGE_KEYS.EXERCISE_DATA, exerciseData);
           });
@@ -495,7 +515,7 @@ const STORAGE_KEYS = {
      /* ---------- Plan New Workout Button ---------- */
      const planBtn = document.getElementById("btn-plan-new");
 
-     planBtn.addEventListener("click", () => {
+     planBtn.addEventListener("click", async () => {
           const name = prompt("Workout title (e.g. Push Day):");
           const type = prompt("Workout type (Strength/Cardio/Flexibility):");
           const duration = prompt("Estimated duration (mins):");
@@ -512,7 +532,7 @@ const STORAGE_KEYS = {
 
           set(STORAGE_KEYS.WORKOUT_TEMPLATES, templates);
 
-          alert("Workout plan saved.\n(For assignment purpose)");
+          showToast("Workout plan saved.", "success");
      });
 
 })();
@@ -521,15 +541,9 @@ const STORAGE_KEYS = {
    PROFILE PAGE LOGIC
    ================================ */
 
-(function () {
+(async function () {
 
      if (!document.getElementById("btn-edit-profile")) return;
-
-     const get = (k, f = {}) => {
-          try { return JSON.parse(localStorage.getItem(k)) || f; }
-          catch { return f; }
-     };
-     const set = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
      const nameEl = document.getElementById("profile-name-display");
 
@@ -582,7 +596,7 @@ const STORAGE_KEYS = {
      }
 
 
-     editBtn.addEventListener("click", () => {
+     editBtn.addEventListener("click", async () => {
           const name = prompt("Full Name:", profile.name);
           if (!name) return;
 
@@ -608,10 +622,10 @@ const STORAGE_KEYS = {
           weightEl.textContent = profile.weight;
           locationEl.textContent = profile.location;
 
-          alert("Profile updated successfully");
+          showToast("Profile updated successfully", "success");
      });
 
-     function saveSettings() {
+     async function saveSettings() {
           const isDark = darkModeToggle.checked;
 
           set(STORAGE_KEYS.PROFILE_SETTINGS, {
@@ -634,7 +648,7 @@ const STORAGE_KEYS = {
      logoutBtn.addEventListener("click", () => {
           localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
           alert("Logged out successfully");
-          window.location.href = "Login.html";
+          window.location.href = "index.html";
      });
 
 })();
@@ -643,7 +657,7 @@ const STORAGE_KEYS = {
    LOGIN / SIGNUP PAGE LOGIC
    ================================ */
 
-(function () {
+(async function () {
 
      if (!document.getElementById("auth-form")) return;
 
@@ -660,20 +674,14 @@ const STORAGE_KEYS = {
      const googleBtn = document.getElementById("google-login-btn");
      const facebookBtn = document.getElementById("facebook-login-btn");
 
-     const get = (k, f = []) => {
-          try { return JSON.parse(localStorage.getItem(k)) || f; }
-          catch { return f; }
-     };
-     const set = (k, v) => localStorage.setItem(k, JSON.stringify(v));
-
-     form.addEventListener("submit", () => {
+     form.addEventListener("submit", async () => {
           const isSignup = signupTab.checked;
 
           const email = emailInput.value.trim();
           const password = passwordInput.value.trim();
 
           if (!email || !password) {
-               alert("Email and password are required");
+               showToast("Email and password are required", "error");
                return;
           }
 
@@ -683,20 +691,29 @@ const STORAGE_KEYS = {
                // SIGN UP
                const name = nameInput.value.trim();
                if (!name) {
-                    alert("Name is required for signup");
+                    showToast("Name is required for signup", "error");
                     return;
                }
 
                const exists = users.find(u => u.email === email);
                if (exists) {
-                    alert("User already exists. Please login.");
+                    showToast("User already exists. Please login.", "error");
                     return;
                }
+
+               // --- SECURITY IMPLEMENTATION ---
+               const salt = window.Security.generateSalt();
+               const passwordHash = await window.Security.hashPassword(password, salt);
+
+               // Derive session key for encryption
+               const sessionKey = await window.Security.deriveKey(password, salt);
+               await window.Security.setSessionKey(sessionKey);
 
                const newUser = {
                     name,
                     email,
-                    password, 
+                    salt,
+                    passwordHash, // Store hash, not password!
                     createdAt: Date.now()
                };
 
@@ -713,15 +730,55 @@ const STORAGE_KEYS = {
                     location: "—"
                });
 
-               alert("Account created successfully");
-               window.location.href = "Dashboard.html";
+               showToast("Account created successfully", "success");
+               setTimeout(() => {
+                    window.location.href = "Dashboard.html";
+               }, 1500);
 
           } else {
-               const user = users.find(
-                    u => u.email === email && u.password === password
-               );
+               // LOGIN
+               let user = users.find(u => u.email === email);
 
                if (!user) {
+                   alert("Invalid email or password");
+                   return;
+               }
+
+               let valid = false;
+
+               // Check if user has salt (Secure User)
+               if (user.salt && user.passwordHash) {
+                   const hash = await window.Security.hashPassword(password, user.salt);
+                   if (hash === user.passwordHash) {
+                       valid = true;
+                       // Set Session Key
+                       const sessionKey = await window.Security.deriveKey(password, user.salt);
+                       await window.Security.setSessionKey(sessionKey);
+                   }
+               } else if (user.password) {
+                   // Legacy User (Plain Text Password) - Upgrade them!
+                   if (user.password === password) {
+                       valid = true;
+
+                       // Migrate to secure storage
+                       const salt = window.Security.generateSalt();
+                       const passwordHash = await window.Security.hashPassword(password, salt);
+                       const sessionKey = await window.Security.deriveKey(password, salt);
+                       await window.Security.setSessionKey(sessionKey);
+
+                       // Update user record
+                       user.salt = salt;
+                       user.passwordHash = passwordHash;
+                       delete user.password; // Remove plain text password
+
+                       // Save updated users list
+                       await window.AsyncStorage.set("users", users);
+
+                       console.log("User migrated to secure storage.");
+                   }
+               }
+
+               if (!valid) {
                     alert("Invalid email or password");
                     return;
                }
@@ -733,12 +790,11 @@ const STORAGE_KEYS = {
      });
 
      googleBtn.addEventListener("click", () => {
-          alert("Google login is mocked for this project");
+          showToast("Google login is mocked for this project", "info");
      });
 
      facebookBtn.addEventListener("click", () => {
-          alert("Facebook login is mocked for this project");
+          showToast("Facebook login is mocked for this project", "info");
      });
 
 })();
-
