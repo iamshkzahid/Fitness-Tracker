@@ -47,26 +47,21 @@ function showToast(message, type = "normal") {
 }
 
 
-/* ================================
-   GLOBAL SESSION CHECK
-   ================================ */
-(async function() {
-    // If we are on the login page, do nothing
-    if (document.getElementById("auth-form")) return;
+const STORAGE_KEYS = {
+     CURRENT_USER: 'currentUser',
+     WORKOUTS: 'workouts',
+     AVG_HR: 'avgHR',
+     WATER_TODAY: 'waterToday',
+     BMI_HISTORY: 'bmiHistory',
+     PLANNER_DATA: 'plannerData',
+     EXERCISE_DATA: 'exerciseData',
+     WORKOUT_TEMPLATES: 'workoutTemplates',
+     PROFILE_DATA: 'profileData',
+     PROFILE_SETTINGS: 'profileSettings',
+     USERS: 'users'
+};
 
-    const raw = localStorage.getItem("currentUser");
-    if (raw) {
-        // Try to decrypt the current user
-        // If raw exists (encrypted) but get returns null, it means we don't have the key (Session Expired)
-        const user = await window.AsyncStorage.get("currentUser");
-        if (!user) {
-            console.warn("Session expired (Key missing). Redirecting to login.");
-            window.location.href = "index.html";
-        }
-    }
-})();
-
-(async function () {
+(function () {
      // helper
      function $(sel, root = document) { return root.querySelector(sel); }
      function $$(sel, root = document) { return Array.from((root || document).querySelectorAll(sel)); }
@@ -75,7 +70,7 @@ function showToast(message, type = "normal") {
 
      // ===== Dynamic Welcome Username =====
      const usernameSpan = document.getElementById("dashboard-username");
-     const currentUser = await window.AsyncStorage.get("currentUser");
+     const currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_USER));
 
      if (usernameSpan && currentUser && currentUser.name) {
           usernameSpan.textContent = currentUser.name;
@@ -108,8 +103,7 @@ function showToast(message, type = "normal") {
           if (!activityTbody) return;
           // clear all rows
           activityTbody.innerHTML = '';
-          const workouts = await window.AsyncStorage.get('workouts', []);
-
+          const workouts = storage.get(STORAGE_KEYS.WORKOUTS, []);
           if (!workouts || workouts.length === 0) {
                const tr = document.createElement('tr');
                tr.innerHTML = `<td colspan="5" style="opacity:.7; padding:20px 24px;">No workouts logged yet. Use the 'Add Workout' form above.</td>`;
@@ -139,16 +133,16 @@ function showToast(message, type = "normal") {
           }
      }
 
-     async function updateStatCards() {
-          const workouts = await window.AsyncStorage.get('workouts', []);
+     function updateStatCards() {
+          const workouts = storage.get(STORAGE_KEYS.WORKOUTS, []);
           // calories total
           const totalCalories = workouts.reduce((s, w) => s + (Number(w.calories) || 0), 0);
           // active minutes total
           const totalMinutes = workouts.reduce((s, w) => s + (Number(w.duration) || 0), 0);
           // average heart rate – we don't have HR stored; keep UI unchanged if no data
-          const avgHR = await window.AsyncStorage.get('avgHR', null);
+          const avgHR = storage.get(STORAGE_KEYS.AVG_HR, null);
         
-          const water = await window.AsyncStorage.get('waterToday', null);
+          const water = storage.get(STORAGE_KEYS.WATER_TODAY, null);
 
           if (statValues && statValues.length >= 4) {
                statValues[0].textContent = `${totalCalories.toLocaleString()} `;
@@ -182,7 +176,7 @@ function showToast(message, type = "normal") {
                }
 
                const obj = { name, duration, calories, ts: Date.now() };
-               await window.AsyncStorage.push('workouts', obj);
+               storage.push(STORAGE_KEYS.WORKOUTS, obj);
 
                if (nameIn) nameIn.value = '';
                if (durIn) durIn.value = '';
@@ -205,7 +199,7 @@ function showToast(message, type = "normal") {
                const cat = bmi < 18.5 ? 'Underweight' : (bmi < 25 ? 'Normal' : (bmi < 30 ? 'Overweight' : 'Obese'));
                bmiResultEl.textContent = bmi;
                bmiCategoryEl.textContent = cat;
-               await window.AsyncStorage.push('bmiHistory', { bmi, height: h, weight: w, ts: Date.now() });
+               storage.push(STORAGE_KEYS.BMI_HISTORY, { bmi, height: h, weight: w, ts: Date.now() });
                alert('BMI calculated and saved');
                // update dashboard widgets, if desired
                await updateStatCards();
@@ -243,8 +237,16 @@ function showToast(message, type = "normal") {
 (async function () {
      if (!document.getElementById("monthly-chart-container")) return;
 
-     const workouts = await window.AsyncStorage.get("workouts", []);
-     const bmiHistory = await window.AsyncStorage.get("bmiHistory", []);
+     const get = (k, f = []) => {
+          try {
+               return JSON.parse(localStorage.getItem(k)) || f;
+          } catch {
+               return f;
+          }
+     };
+
+     const workouts = get(STORAGE_KEYS.WORKOUTS);
+     const bmiHistory = get(STORAGE_KEYS.BMI_HISTORY);
 
      const chartContainer = document.getElementById("monthly-chart-container");
 
@@ -377,8 +379,18 @@ function showToast(message, type = "normal") {
 
      const historyBtn = document.getElementById("bmi-history-btn");
 
-     const saveBMI = async (entry) => {
-          await window.AsyncStorage.push("bmiHistory", entry);
+     const get = (k, f = []) => {
+          try {
+               return JSON.parse(localStorage.getItem(k)) || f;
+          } catch {
+               return f;
+          }
+     };
+
+     const saveBMI = (entry) => {
+          const history = get(STORAGE_KEYS.BMI_HISTORY);
+          history.push(entry);
+          localStorage.setItem(STORAGE_KEYS.BMI_HISTORY, JSON.stringify(history));
      };
 
      function getCategory(bmi) {
@@ -422,8 +434,8 @@ function showToast(message, type = "normal") {
      });
 
      if (historyBtn) {
-          historyBtn.addEventListener("click", async () => {
-               const history = await window.AsyncStorage.get("bmiHistory", []);
+          historyBtn.addEventListener("click", () => {
+               const history = get(STORAGE_KEYS.BMI_HISTORY);
                if (!history.length) {
                     showToast("No BMI history yet", "info");
                     return;
@@ -449,7 +461,7 @@ function showToast(message, type = "normal") {
 
      /* ---------- Calendar Day Logic ---------- */
      const days = document.querySelectorAll(".calendar-day");
-     const plannerData = await window.AsyncStorage.get("plannerData", {});
+     const plannerData = get(STORAGE_KEYS.PLANNER_DATA, {});
 
      days.forEach(day => {
           const dayId = day.id;
@@ -475,7 +487,7 @@ function showToast(message, type = "normal") {
                     ts: Date.now()
                };
 
-               await window.AsyncStorage.set("plannerData", plannerData);
+               set(STORAGE_KEYS.PLANNER_DATA, plannerData);
 
                day.classList.add("day-has-workout");
                const indicator = day.querySelector(".day-indicator");
@@ -484,7 +496,7 @@ function showToast(message, type = "normal") {
      });
 
      const exerciseInputs = document.querySelectorAll(".mini-input");
-     const exerciseData = await window.AsyncStorage.get("exerciseData", {});
+     const exerciseData = get(STORAGE_KEYS.EXERCISE_DATA, {});
 
      exerciseInputs.forEach(input => {
           const key = input.id;
@@ -496,7 +508,7 @@ function showToast(message, type = "normal") {
           // Save on change
           input.addEventListener("change", async () => {
                exerciseData[key] = input.value;
-               await window.AsyncStorage.set("exerciseData", exerciseData);
+               set(STORAGE_KEYS.EXERCISE_DATA, exerciseData);
           });
      });
 
@@ -510,7 +522,7 @@ function showToast(message, type = "normal") {
 
           if (!name || !type || !duration) return;
 
-          const templates = await window.AsyncStorage.get("workoutTemplates", []);
+          const templates = get(STORAGE_KEYS.WORKOUT_TEMPLATES, []);
           templates.push({
                name,
                type,
@@ -518,7 +530,7 @@ function showToast(message, type = "normal") {
                ts: Date.now()
           });
 
-          await window.AsyncStorage.set("workoutTemplates", templates);
+          set(STORAGE_KEYS.WORKOUT_TEMPLATES, templates);
 
           showToast("Workout plan saved.", "success");
      });
@@ -549,7 +561,7 @@ function showToast(message, type = "normal") {
      const unitsSelect = document.getElementById("units-system-select");
      const darkModeToggle = document.getElementById("dark-mode-toggle");
 
-     const profile = await window.AsyncStorage.get("profileData", {
+     const profile = get(STORAGE_KEYS.PROFILE_DATA, {
           name: "Alex Log.",
           email: "alex.log@example.com",
           age: "28 years",
@@ -565,7 +577,7 @@ function showToast(message, type = "normal") {
      weightEl.textContent = profile.weight;
      locationEl.textContent = profile.location;
 
-     const settings = await window.AsyncStorage.get("profileSettings", {
+     const settings = get(STORAGE_KEYS.PROFILE_SETTINGS, {
           notifications: true,
           publicProfile: false,
           units: "Metric (kg, cm)",
@@ -601,8 +613,7 @@ function showToast(message, type = "normal") {
           profile.weight = weight || profile.weight;
           profile.location = location || profile.location;
 
-          // Note: This will be auto-encrypted if session key is present!
-          await window.AsyncStorage.set("profileData", profile);
+          set(STORAGE_KEYS.PROFILE_DATA, profile);
 
           nameEl.textContent = profile.name;
           emailEl.textContent = profile.email;
@@ -617,7 +628,7 @@ function showToast(message, type = "normal") {
      async function saveSettings() {
           const isDark = darkModeToggle.checked;
 
-          await window.AsyncStorage.set("profileSettings", {
+          set(STORAGE_KEYS.PROFILE_SETTINGS, {
                notifications: notifToggle.checked,
                publicProfile: publicToggle.checked,
                units: unitsSelect.value,
@@ -634,9 +645,8 @@ function showToast(message, type = "normal") {
      darkModeToggle.addEventListener("change", saveSettings);
 
      /* ---------- Logout ---------- */
-     logoutBtn.addEventListener("click", async () => {
-          await window.AsyncStorage.remove("currentUser");
-          window.Security.clearSession(); // Clear session key from memory/sessionStorage
+     logoutBtn.addEventListener("click", () => {
+          localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
           alert("Logged out successfully");
           window.location.href = "index.html";
      });
@@ -675,7 +685,7 @@ function showToast(message, type = "normal") {
                return;
           }
 
-          let users = await window.AsyncStorage.get("users", []);
+          let users = get(STORAGE_KEYS.USERS, []);
 
           if (isSignup) {
                // SIGN UP
@@ -708,21 +718,10 @@ function showToast(message, type = "normal") {
                };
 
                users.push(newUser);
+               set(STORAGE_KEYS.USERS, users);
+               set(STORAGE_KEYS.CURRENT_USER, newUser);
 
-               // Save users list (users list itself is plain text so we can find email, but passwords are hashed)
-               // Note: We are NOT encrypting 'users' key in AsyncStorage.js for this reason.
-               await window.AsyncStorage.set("users", users);
-
-               // Store current user (without password)
-               // Encrypted because 'currentUser' is in encryptedKeys list
-               await window.AsyncStorage.set("currentUser", {
-                    name: newUser.name,
-                    email: newUser.email,
-                    createdAt: newUser.createdAt
-               });
-
-               // Initialize profile data (Encrypted!)
-               await window.AsyncStorage.set("profileData", {
+               set(STORAGE_KEYS.PROFILE_DATA, {
                     name: newUser.name,
                     email: newUser.email,
                     age: "—",
@@ -784,13 +783,7 @@ function showToast(message, type = "normal") {
                     return;
                }
 
-               // Save current user
-               await window.AsyncStorage.set("currentUser", {
-                    name: user.name,
-                    email: user.email,
-                    createdAt: user.createdAt
-               });
-
+               set(STORAGE_KEYS.CURRENT_USER, user);
                alert("Login successful");
                window.location.href = "Dashboard.html";
           }
